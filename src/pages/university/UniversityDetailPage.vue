@@ -1,20 +1,23 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { WHATSAPP } from '../../data/site.js'
-import universities from '../../data/universities.json'
+import { useSiteSettings } from '../../composables/useSiteSettings.js'
+import { fetchUniversities, fetchUniversityBySlug } from '../../api/universities.js'
 import UniversityCard from '../../components/ui/UniversityCard.vue'
 
+const { whatsapp: WHATSAPP } = useSiteSettings()
 const route = useRoute()
 const sliderIndex = ref(0)
 const sliderPaused = ref(false)
+const loading = ref(true)
+const error = ref('')
+const uni = ref(null)
+const allUniversities = ref([])
 let sliderTimer = null
 
-const uni = computed(() => universities.find((u) => u.slug === route.params.slug))
-
 const sliderUniversities = computed(() => {
-  if (!uni.value) return universities.slice(0, 8)
-  const rest = universities.filter((u) => u.slug !== uni.value.slug)
+  if (!uni.value) return allUniversities.value.slice(0, 8)
+  const rest = allUniversities.value.filter((u) => u.slug !== uni.value.slug)
   return [uni.value, ...rest].slice(0, 10)
 })
 
@@ -22,7 +25,7 @@ const activeSlide = computed(() => sliderUniversities.value[sliderIndex.value] |
 
 const similar = computed(() => {
   if (!uni.value) return []
-  return universities
+  return allUniversities.value
     .filter((u) => u.slug !== uni.value.slug && u.city === uni.value.city)
     .slice(0, 3)
 })
@@ -31,9 +34,9 @@ const highlights = computed(() => {
   if (!uni.value) return []
   return [
     {
-      label: 'Global rank',
-      value: `#${uni.value.ranking}`,
-      note: 'Dummy ranking for UI preview',
+      label: 'Reference',
+      value: `#${uni.value.id || uni.value.ranking}`,
+      note: 'Admin university ID',
     },
     {
       label: 'Scholarship',
@@ -50,12 +53,19 @@ const highlights = computed(() => {
 
 const overviewPoints = computed(() => {
   if (!uni.value) return []
+  if (uni.value.excerpt) {
+    return [
+      uni.value.excerpt,
+      `Students usually shortlist this university for study pathways with AR Education counselling support.`,
+      uni.value.scholarship
+        ? 'Scholarship options may be available for strong academic profiles and complete applications.'
+        : 'Scholarship availability can vary — we help you check the best route before you apply.',
+      'We guide admission, documents, visa planning and the full student journey in Bangla.',
+    ]
+  }
   return [
     `${uni.value.name} welcomes international students from Bangladesh across undergraduate and postgraduate pathways.`,
-    `Students usually shortlist this university for its location in ${uni.value.city}, practical campus environment and affordable study route.`,
-    uni.value.scholarship
-      ? 'Scholarship options may be available for strong academic profiles and complete applications.'
-      : 'Scholarship availability can vary, so we help you check the best route before you apply.',
+    `Students usually shortlist this university with AR Education guidance for admission and visa planning.`,
     'We guide admission, documents, visa planning and the full student journey in Bangla.',
   ]
 })
@@ -65,7 +75,7 @@ const quickFacts = computed(() => {
   return [
     { title: 'Degree paths', value: 'Bachelor · Master · Language' },
     { title: 'Application help', value: 'Full support from AR Education' },
-    { title: 'Popular with BD students', value: 'Yes, especially budget-conscious applicants' },
+    { title: 'Source', value: 'Live from admin CMS' },
     { title: 'Best next step', value: 'Check scholarship + total cost in Taka' },
   ]
 })
@@ -89,17 +99,35 @@ function stopSlider() {
   sliderTimer = null
 }
 
+async function load() {
+  loading.value = true
+  error.value = ''
+  try {
+    const [detail, list] = await Promise.all([
+      fetchUniversityBySlug(route.params.slug),
+      fetchUniversities({ perPage: 40 }),
+    ])
+    uni.value = detail
+    allUniversities.value = list.items
+    sliderIndex.value = 0
+    startSlider()
+  } catch (e) {
+    console.error(e)
+    error.value = e.message || 'Failed to load university'
+    uni.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
 watch(
   () => route.params.slug,
   () => {
-    sliderIndex.value = 0
-    startSlider()
+    load()
   },
 )
 
-onMounted(() => {
-  startSlider()
-})
+onMounted(load)
 
 onUnmounted(() => {
   stopSlider()
@@ -107,8 +135,27 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="uni">
+  <div v-if="loading" class="site-container py-20 text-center text-[14px] text-ink/45">
+    Loading university from admin...
+  </div>
+
+  <div v-else-if="error" class="site-container max-w-lg py-20 text-center">
+    <h1 class="font-display text-2xl font-extrabold text-ink">Could not load university</h1>
+    <p class="mt-2 text-[13px] text-ink/50">{{ error }}</p>
+    <RouterLink to="/universities" class="mt-4 inline-block text-[13px] font-semibold text-crimson">Browse universities</RouterLink>
+  </div>
+
+  <div v-else-if="uni">
     <section class="relative overflow-hidden bg-gradient-to-br from-[#0A1628] via-[#132746] to-[#1f4b67] text-white">
+      <img
+        v-if="uni.image"
+        :src="uni.image"
+        :alt="uni.name"
+        loading="eager"
+        decoding="async"
+        class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-35"
+      />
+      <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,rgba(8,16,32,0.88)_0%,rgba(10,22,40,0.78)_55%,rgba(10,22,40,0.7)_100%)]" />
       <div class="pointer-events-none absolute inset-0 texture-grid opacity-30"></div>
       <div class="pointer-events-none absolute -right-20 top-0 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
 
@@ -138,7 +185,7 @@ onUnmounted(() => {
               {{ uni.name }}
             </h1>
             <p class="mt-4 max-w-xl text-[15px] leading-relaxed text-white/65">
-              A China study option for Bangladeshi students looking at {{ uni.city }}, {{ uni.province }} with guidance on admission, scholarship and visa planning.
+              A China study option for Bangladeshi students — admission, scholarship and visa planning with AR Education.
             </p>
 
             <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -153,89 +200,18 @@ onUnmounted(() => {
           </div>
 
           <div
-            class="rounded-[1.75rem] bg-white/10 p-4 ring-1 ring-white/12 backdrop-blur sm:p-5"
+            class="overflow-hidden rounded-[1.75rem] bg-white/10 p-2 ring-1 ring-white/12 backdrop-blur sm:p-3"
             @mouseenter="sliderPaused = true"
             @mouseleave="sliderPaused = false"
           >
-            <div class="mb-3 flex items-center justify-between gap-3 px-1">
-              <div class="text-[10px] font-bold uppercase tracking-[0.16em] text-white/50">University showcase</div>
-              <div class="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
-                  aria-label="Previous university"
-                  @click="goToSlide(sliderIndex - 1)"
-                >
-                  <i class="ti ti-chevron-left text-[16px]"></i>
-                </button>
-                <button
-                  type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
-                  aria-label="Next university"
-                  @click="goToSlide(sliderIndex + 1)"
-                >
-                  <i class="ti ti-chevron-right text-[16px]"></i>
-                </button>
-              </div>
+            <div v-if="uni.image" class="overflow-hidden rounded-[1.35rem]">
+              <img :src="uni.image" :alt="uni.name" loading="eager" decoding="async" class="h-56 w-full object-cover sm:h-72" />
             </div>
-
-            <Transition name="uni-slide" mode="out-in">
-              <RouterLink
-                :key="activeSlide.slug"
-                :to="`/university/${activeSlide.slug}`"
-                class="relative block overflow-hidden rounded-[1.35rem] bg-gradient-to-br from-[#143153] to-[#2c5f7f] p-5 sm:p-6"
-              >
-                <div class="absolute inset-0 opacity-20" style="background: radial-gradient(circle at 20% 20%, #fff 0%, transparent 32%)"></div>
-                <div class="absolute inset-0 texture-grid opacity-20"></div>
-                <div class="relative flex items-start justify-between gap-4">
-                  <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/95 font-display text-lg font-extrabold text-ink">
-                    {{ activeSlide.code }}
-                  </span>
-                  <div class="text-right">
-                    <div class="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-ink">#{{ activeSlide.ranking }}</div>
-                    <div class="mt-2 text-[11px] uppercase tracking-[0.14em] text-white/55">Views {{ activeSlide.views }}</div>
-                  </div>
-                </div>
-                <div class="mt-16 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/45">
-                  {{ activeSlide.city }}, {{ activeSlide.province }}
-                </div>
-                <div class="mt-2 font-display text-[1.35rem] font-bold leading-tight text-white">
-                  {{ activeSlide.name }}
-                </div>
-                <div class="mt-3 inline-flex items-center gap-2 text-[12px] font-semibold text-white/80">
-                  View university
-                  <i class="ti ti-arrow-up-right"></i>
-                </div>
-              </RouterLink>
-            </Transition>
-
-            <div class="mt-3 flex justify-center gap-1.5">
-              <button
-                v-for="(item, i) in sliderUniversities"
-                :key="item.slug"
-                type="button"
-                class="h-1.5 rounded-full transition-all"
-                :class="i === sliderIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/35 hover:bg-white/55'"
-                :aria-label="`Show ${item.name}`"
-                @click="goToSlide(i)"
-              ></button>
+            <div v-else class="flex h-56 items-center justify-center rounded-[1.35rem] bg-gradient-to-br from-[#143153] to-[#2c5f7f] sm:h-72">
+              <span class="font-display text-4xl font-extrabold text-white/80">{{ uni.code }}</span>
             </div>
-
-            <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-              <button
-                v-for="(item, i) in sliderUniversities.slice(0, 6)"
-                :key="`${item.slug}-thumb`"
-                type="button"
-                class="rounded-xl px-3 py-2 text-left text-[11px] font-semibold transition"
-                :class="
-                  i === sliderIndex
-                    ? 'bg-white text-ink shadow-sm'
-                    : 'bg-white/8 text-white/70 hover:bg-white/12 hover:text-white'
-                "
-                @click="goToSlide(i)"
-              >
-                <div class="truncate">{{ item.name }}</div>
-              </button>
+            <div class="px-3 py-3 text-[12px] text-white/70">
+              {{ uni.city }} · {{ uni.province }}
             </div>
           </div>
         </div>
@@ -257,36 +233,35 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <div class="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <div class="rounded-[1.75rem] bg-white p-6 ring-1 ring-ink/8 sm:p-8">
-              <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-crimson">Overview</div>
-              <h2 class="mt-2 font-display text-2xl font-extrabold text-ink">Why students look at this university</h2>
-              <div class="mt-5 space-y-3">
-                <div
-                  v-for="point in overviewPoints"
-                  :key="point"
-                  class="flex items-start gap-3 rounded-2xl bg-[#F7F8FA] px-4 py-3.5"
-                >
-                  <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-crimson text-white">
-                    <i class="ti ti-check text-[14px]"></i>
-                  </span>
-                  <span class="text-[14px] leading-relaxed text-ink/75">{{ point }}</span>
-                </div>
+          <div class="rounded-[1.75rem] bg-white p-6 ring-1 ring-ink/8 sm:p-8">
+            <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-crimson">Overview</div>
+            <h2 class="mt-2 font-display text-2xl font-extrabold text-ink">About this university</h2>
+            <div v-if="uni.content" class="prose mt-5 max-w-none text-[14px] leading-relaxed text-ink/75" v-html="uni.content"></div>
+            <div v-else class="mt-5 space-y-3">
+              <div
+                v-for="point in overviewPoints"
+                :key="point"
+                class="flex items-start gap-3 rounded-2xl bg-[#F7F8FA] px-4 py-3.5"
+              >
+                <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-crimson text-white">
+                  <i class="ti ti-check text-[14px]"></i>
+                </span>
+                <span class="text-[14px] leading-relaxed text-ink/75">{{ point }}</span>
               </div>
             </div>
+          </div>
 
-            <div class="rounded-[1.75rem] bg-[#F7FAF9] p-6 ring-1 ring-jade/10 sm:p-8">
-              <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">Quick facts</div>
-              <h2 class="mt-2 font-display text-2xl font-extrabold text-ink">At a glance</h2>
-              <div class="mt-5 space-y-3">
-                <div
-                  v-for="fact in quickFacts"
-                  :key="fact.title"
-                  class="rounded-2xl bg-white px-4 py-3.5 ring-1 ring-ink/6"
-                >
-                  <div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/35">{{ fact.title }}</div>
-                  <div class="mt-1 text-[14px] font-medium leading-relaxed text-ink/80">{{ fact.value }}</div>
-                </div>
+          <div class="rounded-[1.75rem] bg-[#F7FAF9] p-6 ring-1 ring-jade/10 sm:p-8">
+            <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-jade">Quick facts</div>
+            <h2 class="mt-2 font-display text-2xl font-extrabold text-ink">At a glance</h2>
+            <div class="mt-5 space-y-3">
+              <div
+                v-for="fact in quickFacts"
+                :key="fact.title"
+                class="rounded-2xl bg-white px-4 py-3.5 ring-1 ring-ink/6"
+              >
+                <div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/35">{{ fact.title }}</div>
+                <div class="mt-1 text-[14px] font-medium leading-relaxed text-ink/80">{{ fact.value }}</div>
               </div>
             </div>
           </div>
@@ -317,16 +292,6 @@ onUnmounted(() => {
               WhatsApp
             </a>
           </div>
-
-          <RouterLink
-            :to="{ path: '/compare', query: { add: uni.slug } }"
-            class="block rounded-2xl bg-white p-5 text-center text-[13px] font-semibold text-ink ring-1 ring-ink/8 transition hover:-translate-y-0.5 hover:shadow-soft"
-          >
-            Add to compare →
-          </RouterLink>
-          <RouterLink :to="`/city/${uni.city?.toLowerCase()}`" class="block break-words rounded-2xl bg-[#F7F8FA] p-5 text-[13px] font-semibold text-crimson ring-1 ring-ink/6">
-            Explore {{ uni.city }} →
-          </RouterLink>
         </aside>
       </div>
     </section>
@@ -337,20 +302,3 @@ onUnmounted(() => {
     <RouterLink to="/universities" class="mt-4 inline-block text-[13px] font-semibold text-crimson">Browse universities</RouterLink>
   </div>
 </template>
-
-<style scoped>
-.uni-slide-enter-active,
-.uni-slide-leave-active {
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.uni-slide-enter-from {
-  opacity: 0;
-  transform: translateX(20px) scale(0.98);
-}
-
-.uni-slide-leave-to {
-  opacity: 0;
-  transform: translateX(-20px) scale(0.98);
-}
-</style>

@@ -1,28 +1,37 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import universities from '../../data/universities.json'
+import { HOME_UNIVERSITIES } from '../../data/homeFallbacks.js'
+import { fetchUniversities } from '../../api/universities.js'
 import UniversityCard from '../ui/UniversityCard.vue'
 
-const featured = ref([...universities].sort((a, b) => a.ranking - b.ranking).slice(0, 10))
+const featured = ref([...HOME_UNIVERSITIES])
 const currentIndex = ref(0)
 const paused = ref(false)
 let timer = null
 
 const heroUniversity = computed(() => featured.value[currentIndex.value] || featured.value[0])
-const sideUniversities = computed(() =>
-  Array.from({ length: 4 }, (_, i) => featured.value[(currentIndex.value + i + 1) % featured.value.length]),
-)
-const gridUniversities = computed(() =>
-  Array.from({ length: 3 }, (_, i) => featured.value[(currentIndex.value + i + 5) % featured.value.length]),
-)
+const sideUniversities = computed(() => {
+  if (!featured.value.length) return []
+  return Array.from({ length: Math.min(4, featured.value.length) }, (_, i) =>
+    featured.value[(currentIndex.value + i + 1) % featured.value.length],
+  )
+})
+const gridUniversities = computed(() => {
+  if (!featured.value.length) return []
+  return Array.from({ length: Math.min(3, featured.value.length) }, (_, i) =>
+    featured.value[(currentIndex.value + i + 5) % featured.value.length],
+  )
+})
 
 function goTo(index) {
+  if (!featured.value.length) return
   currentIndex.value = (index + featured.value.length) % featured.value.length
 }
 
 function startSlider() {
   stopSlider()
+  if (featured.value.length <= 1) return
   timer = setInterval(() => {
     if (!paused.value) goTo(currentIndex.value + 1)
   }, 3000)
@@ -33,23 +42,47 @@ function stopSlider() {
   timer = null
 }
 
-function refresh() {
-  featured.value = [...universities].sort(() => Math.random() - 0.5).slice(0, 10)
-  currentIndex.value = 0
-  startSlider()
+async function loadFeatured() {
+  try {
+    const result = await fetchUniversities({ perPage: 12 })
+    if (result.items?.length) {
+      featured.value = result.items.slice(0, 10)
+      currentIndex.value = 0
+      startSlider()
+    }
+  } catch (e) {
+    // keep fallbacks
+  }
 }
+
+function onVisible(entries, observer) {
+  if (entries.some((e) => e.isIntersecting)) {
+    observer.disconnect()
+    loadFeatured()
+  }
+}
+
+const sectionEl = ref(null)
+let visibilityObserver = null
 
 onMounted(() => {
   startSlider()
+  if (!('IntersectionObserver' in window)) {
+    loadFeatured()
+    return
+  }
+  visibilityObserver = new IntersectionObserver(onVisible, { rootMargin: '240px' })
+  if (sectionEl.value) visibilityObserver.observe(sectionEl.value)
 })
 
 onUnmounted(() => {
   stopSlider()
+  if (visibilityObserver) visibilityObserver.disconnect()
 })
 </script>
 
 <template>
-  <section class="relative overflow-hidden bg-[#F7FAF9] py-14 sm:py-16 lg:py-20">
+  <section ref="sectionEl" class="relative overflow-hidden bg-[#F7FAF9] py-14 sm:py-16 lg:py-20">
     <div class="pointer-events-none absolute -right-20 top-10 h-56 w-56 rounded-full bg-jade/10 blur-3xl" />
     <div class="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-crimson/5 blur-3xl" />
 
@@ -69,14 +102,6 @@ onUnmounted(() => {
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-ink/20 hover:bg-white"
-            @click="refresh"
-          >
-            <i class="ti ti-refresh"></i>
-            Refresh
-          </button>
           <RouterLink
             to="/universities"
             class="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#132038]"
@@ -127,8 +152,17 @@ onUnmounted(() => {
                 class="group absolute inset-0 block overflow-hidden transition duration-300 hover:shadow-lift"
               >
                 <div class="absolute inset-0 bg-gradient-to-br from-[#10233c] via-[#193960] to-[#0f766e]" />
-                <div class="absolute inset-0 opacity-30" style="background: radial-gradient(circle at 18% 20%, #ffffff 0%, transparent 32%)" />
-                <div class="absolute inset-0 texture-grid opacity-35" />
+                <img
+                  v-if="heroUniversity.image"
+                  :src="heroUniversity.image"
+                  :alt="heroUniversity.name"
+                  loading="lazy"
+                  decoding="async"
+                  class="absolute inset-0 h-full w-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-[#08111d] via-[#08111d]/45 to-transparent" />
+                <div class="absolute inset-0 opacity-25" style="background: radial-gradient(circle at 18% 20%, #ffffff 0%, transparent 32%)" />
+                <div class="absolute inset-0 texture-grid opacity-25" />
                 <div class="absolute inset-x-6 top-6 flex items-start justify-between gap-4">
                   <div class="rounded-full bg-white/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 backdrop-blur">
                     Featured university
@@ -211,10 +245,20 @@ onUnmounted(() => {
             class="group flex items-center gap-4 rounded-2xl bg-white p-4 ring-1 ring-ink/8 transition duration-300 hover:-translate-y-0.5 hover:shadow-soft hover:ring-crimson/20"
           >
             <div class="relative flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#11233c] to-[#28557c]">
-              <div class="absolute inset-0 texture-grid opacity-25" />
-              <span class="relative font-display text-xl font-extrabold text-white/90">
-                {{ uni.code?.slice(0, 3) }}
-              </span>
+              <img
+                v-if="uni.image"
+                :src="uni.image"
+                :alt="uni.name"
+                loading="lazy"
+                decoding="async"
+                class="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              />
+              <template v-else>
+                <div class="absolute inset-0 texture-grid opacity-25" />
+                <span class="relative font-display text-xl font-extrabold text-white/90">
+                  {{ uni.code?.slice(0, 3) }}
+                </span>
+              </template>
             </div>
             <div class="min-w-0 flex-1">
               <div class="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/35">#{{ uni.ranking }}</div>
@@ -228,6 +272,7 @@ onUnmounted(() => {
         </div>
       </div>
 
+      <template v-if="featured.length">
       <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <UniversityCard v-for="uni in gridUniversities" :key="uni.slug" :university="uni" />
       </div>
@@ -236,7 +281,7 @@ onUnmounted(() => {
         class="mt-10 flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl bg-ink px-5 py-6 text-white sm:flex-row sm:items-center sm:px-8 sm:py-7"
       >
         <div>
-          <div class="font-display text-lg font-bold sm:text-xl">Explore all 98+ universities</div>
+          <div class="font-display text-lg font-bold sm:text-xl">Explore all {{ featured.length }}+ universities</div>
           <p class="mt-1 text-[13px] text-white/50">Filter by city, ranking, scholarship and subject.</p>
         </div>
         <RouterLink
@@ -247,6 +292,7 @@ onUnmounted(() => {
           <i class="ti ti-arrow-right"></i>
         </RouterLink>
       </div>
+      </template>
     </div>
   </section>
 </template>

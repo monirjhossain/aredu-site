@@ -1,7 +1,9 @@
 <script setup>
 import { watch, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { BRAND, WHATSAPP } from '../../data/site'
+import { useSiteSettings } from '../../composables/useSiteSettings.js'
+
+const { brand: BRAND, whatsapp: WHATSAPP } = useSiteSettings()
 
 const props = defineProps({ open: Boolean })
 defineEmits(['close'])

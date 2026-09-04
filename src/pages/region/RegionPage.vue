@@ -1,27 +1,50 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { REGIONS, WHATSAPP } from '../../data/site.js'
-import cities from '../../data/cities.json'
-import universities from '../../data/universities.json'
+import { REGIONS } from '../../data/site.js'
+import { useSiteSettings } from '../../composables/useSiteSettings.js'
+import { fetchCities } from '../../api/cities.js'
+import { fetchUniversities } from '../../api/universities.js'
 import UniversityCard from '../../components/ui/UniversityCard.vue'
 
+const { whatsapp: WHATSAPP } = useSiteSettings()
 const route = useRoute()
+const regionCities = ref([])
+const regionUnis = ref([])
+const loading = ref(true)
 
 const region = computed(() => REGIONS.find((r) => r.slug === route.params.slug))
 
-const regionCities = computed(() => {
-  if (!region.value) return []
-  const idx = REGIONS.findIndex((r) => r.slug === region.value.slug)
-  const slice = Math.ceil(cities.length / REGIONS.length)
-  return cities.slice(idx * slice, (idx + 1) * slice)
-})
+async function load() {
+  if (!region.value) {
+    regionCities.value = []
+    regionUnis.value = []
+    loading.value = false
+    return
+  }
+  loading.value = true
+  try {
+    const [citiesResult, unisResult] = await Promise.all([
+      fetchCities({ region: region.value.name, perPage: 100 }),
+      fetchUniversities({ perPage: 100 }),
+    ])
+    regionCities.value = citiesResult.items
+    const cityNames = new Set(citiesResult.items.map((c) => c.name.toLowerCase()))
+    const citySlugs = new Set(citiesResult.items.map((c) => c.slug.toLowerCase()))
+    regionUnis.value = unisResult.items
+      .filter((u) => cityNames.has((u.city || '').toLowerCase()) || citySlugs.has((u.city || '').toLowerCase()))
+      .slice(0, 12)
+  } catch (e) {
+    console.error(e)
+    regionCities.value = []
+    regionUnis.value = []
+  } finally {
+    loading.value = false
+  }
+}
 
-const regionUnis = computed(() => {
-  if (!regionCities.value.length) return universities.slice(0, 9)
-  const cityNames = new Set(regionCities.value.map((c) => c.name.toLowerCase()))
-  return universities.filter((u) => cityNames.has(u.city?.toLowerCase())).slice(0, 12)
-})
+onMounted(load)
+watch(() => route.params.slug, load)
 </script>
 
 <template>
@@ -41,7 +64,8 @@ const regionUnis = computed(() => {
 
     <section class="mt-10">
       <h2 class="text-xl font-extrabold text-[var(--color-secondary)]">Cities in {{ region.name }}</h2>
-      <div class="mt-4 flex flex-wrap gap-2">
+      <div v-if="loading" class="mt-4 text-[13px] text-gray-400">Loading…</div>
+      <div v-else class="mt-4 flex flex-wrap gap-2">
         <RouterLink
           v-for="city in regionCities"
           :key="city.slug"
@@ -50,6 +74,7 @@ const regionUnis = computed(() => {
         >
           {{ city.name }}
         </RouterLink>
+        <p v-if="!regionCities.length" class="text-[14px] text-gray-500">No cities linked to this region in admin yet.</p>
       </div>
     </section>
 
@@ -58,6 +83,7 @@ const regionUnis = computed(() => {
       <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <UniversityCard v-for="uni in regionUnis" :key="uni.slug" :university="uni" />
       </div>
+      <p v-if="!loading && !regionUnis.length" class="mt-4 text-[14px] text-gray-500">No universities matched for this region yet.</p>
     </section>
 
     <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">

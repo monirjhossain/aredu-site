@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { BRAND } from '../../data/site'
+import { useSiteSettings } from '../../composables/useSiteSettings.js'
 import MegaUniversities from './mega/MegaUniversities.vue'
 import MegaScholarships from './mega/MegaScholarships.vue'
 import MegaMajors from './mega/MegaMajors.vue'
@@ -9,6 +9,8 @@ import MegaCities from './mega/MegaCities.vue'
 import MegaServices from './mega/MegaServices.vue'
 import MegaTools from './mega/MegaTools.vue'
 import MobileDrawer from './MobileDrawer.vue'
+
+const { brand: BRAND } = useSiteSettings()
 
 const mega = ref(null)
 const searchOpen = ref(false)

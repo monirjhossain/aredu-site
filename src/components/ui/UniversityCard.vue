@@ -13,10 +13,20 @@ defineProps({
   >
     <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[45%] bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(247,248,250,0.9))]"></div>
     <div class="relative h-44 overflow-hidden bg-ink sm:h-48">
+      <img
+        v-if="university.image"
+        :src="university.image"
+        :alt="university.name"
+        loading="lazy"
+        decoding="async"
+        class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+      />
       <div
+        v-else
         class="absolute inset-0 opacity-90 transition duration-500 group-hover:scale-105"
         :style="{ background: `linear-gradient(135deg, #0A1628 0%, #1a3050 50%, #E11D2E 160%)` }"
       />
+      <div class="absolute inset-0 bg-gradient-to-t from-[#08111d]/90 via-[#08111d]/20 to-transparent" />
       <div class="absolute inset-0 texture-grid opacity-40" />
       <div class="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-white/10 blur-2xl"></div>
       <div class="absolute left-4 top-4 rounded-full bg-white/95 px-2.5 py-1 font-display text-[10.5px] font-bold text-ink shadow-sm">
@@ -34,8 +44,16 @@ defineProps({
     </div>
     <div class="relative p-4 sm:p-5">
       <div class="flex items-start gap-3">
-        <span class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-sand font-display text-[11px] font-bold text-ink shadow-sm">
-          {{ university.code?.slice(0, 3) || 'UNI' }}
+        <span class="relative flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-sand font-display text-[11px] font-bold text-ink shadow-sm">
+          <img
+            v-if="university.image"
+            :src="university.image"
+            :alt="university.name"
+            loading="lazy"
+            decoding="async"
+            class="absolute inset-0 h-full w-full object-cover"
+          />
+          <span v-else>{{ university.code?.slice(0, 3) || 'UNI' }}</span>
         </span>
         <div class="min-w-0">
           <h3 class="line-clamp-2 font-display text-[15px] font-bold leading-snug text-ink transition group-hover:text-crimson">

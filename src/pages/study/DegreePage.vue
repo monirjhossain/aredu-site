@@ -1,19 +1,23 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { DEGREES, WHATSAPP } from '../../data/site.js'
-import universities from '../../data/universities.json'
+import { DEGREES } from '../../data/site.js'
+import { useUniversitiesCatalog } from '../../composables/useUniversitiesCatalog.js'
+import { useSiteSettings } from '../../composables/useSiteSettings.js'
 import UniversityCard from '../../components/ui/UniversityCard.vue'
 
 const route = useRoute()
+const { whatsapp: WHATSAPP } = useSiteSettings()
+const { items: universities, load } = useUniversitiesCatalog()
+onMounted(() => load())
 
 const degree = computed(() => DEGREES.find((d) => d.slug === route.params.slug))
 
 const relatedUnis = computed(() => {
   if (!degree.value) return []
-  return universities
-    .filter((u) => u.scholarship || u.ranking <= 50)
-    .sort((a, b) => a.ranking - b.ranking)
+  return [...universities.value]
+    .filter((u) => u.scholarship || (u.ranking || 99) <= 50)
+    .sort((a, b) => (a.ranking || 99) - (b.ranking || 99))
     .slice(0, 9)
 })
 </script>

@@ -1,7 +1,7 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import universities from '../data/universities.json'
+import { fetchUniversities } from '../api/universities.js'
 import UniversityCard from '../components/ui/UniversityCard.vue'
 import NeedHelpBanner from '../components/ui/NeedHelpBanner.vue'
 
@@ -10,11 +10,14 @@ const router = useRouter()
 
 const PER_PAGE = 12
 const page = ref(1)
-const sortBy = ref('ranking')
+const sortBy = ref('name')
 const searchQuery = ref(route.query.q?.toString() || '')
 const selectedCity = ref('all')
 const scholarshipOnly = ref(false)
-const topRankedOnly = ref(false)
+const loading = ref(false)
+const error = ref('')
+const universities = ref([])
+const totalFromApi = ref(0)
 
 watch(
   () => route.query.q,
@@ -24,19 +27,41 @@ watch(
   },
 )
 
+async function loadUniversities() {
+  loading.value = true
+  error.value = ''
+  try {
+    const result = await fetchUniversities({
+      search: searchQuery.value.trim(),
+      perPage: 100,
+    })
+    universities.value = result.items
+    totalFromApi.value = result.total
+  } catch (e) {
+    console.error(e)
+    error.value = e.message || 'Could not load universities from admin API'
+    universities.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadUniversities)
+
 const cityOptions = computed(() =>
-  ['all', ...new Set(universities.map((u) => u.city).filter(Boolean))],
+  ['all', ...new Set(universities.value.map((u) => u.city).filter(Boolean))],
 )
 
 const filtered = computed(() => {
-  let list = [...universities]
+  let list = [...universities.value]
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase()
     list = list.filter(
       (u) =>
         u.name.toLowerCase().includes(q) ||
         u.city?.toLowerCase().includes(q) ||
-        u.code?.toLowerCase().includes(q),
+        u.code?.toLowerCase().includes(q) ||
+        u.slug?.toLowerCase().includes(q),
     )
   }
   if (selectedCity.value !== 'all') {
@@ -44,9 +69,6 @@ const filtered = computed(() => {
   }
   if (scholarshipOnly.value) {
     list = list.filter((u) => u.scholarship)
-  }
-  if (topRankedOnly.value) {
-    list = list.filter((u) => u.ranking <= 200)
   }
   if (sortBy.value === 'ranking') list.sort((a, b) => a.ranking - b.ranking)
   else if (sortBy.value === 'name') list.sort((a, b) => a.name.localeCompare(b.name))
@@ -69,16 +91,17 @@ function goToPage(p) {
 function onSearch() {
   page.value = 1
   router.push({ path: '/universities', query: searchQuery.value ? { q: searchQuery.value } : {} })
+  loadUniversities()
 }
 
 function clearFilters() {
   selectedCity.value = 'all'
   scholarshipOnly.value = false
-  topRankedOnly.value = false
   searchQuery.value = ''
-  sortBy.value = 'ranking'
+  sortBy.value = 'name'
   page.value = 1
   router.push({ path: '/universities' })
+  loadUniversities()
 }
 </script>
 
@@ -98,7 +121,7 @@ function clearFilters() {
             Find the right Chinese university for your budget, major and scholarship goals.
           </h1>
           <p class="mt-4 max-w-2xl text-[15px] leading-relaxed text-white/60">
-            Search by university name, city or code — then shortlist, compare and plan your full study route from Bangladesh.
+            Live data from AR Education admin — search, shortlist and plan your study route from Bangladesh.
           </p>
         </div>
 
@@ -112,7 +135,7 @@ function clearFilters() {
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="Search universities, city, code..."
+                placeholder="Search universities..."
                 class="w-full bg-transparent text-[14px] text-ink outline-none placeholder:text-ink/35 focus:outline-none"
               />
             </div>
@@ -122,8 +145,8 @@ function clearFilters() {
                 class="rounded-2xl border border-white/15 bg-white px-4 py-3 text-[13px] font-semibold text-ink outline-none focus:outline-none"
                 @change="page = 1"
               >
-                <option value="ranking">Sort by ranking</option>
                 <option value="name">Sort by name</option>
+                <option value="ranking">Sort by id</option>
                 <option value="views">Sort by views</option>
               </select>
               <button
@@ -138,9 +161,8 @@ function clearFilters() {
         </form>
 
         <div class="mt-6 flex flex-wrap items-center gap-3 text-[12px] text-white/55">
-          <span class="rounded-full bg-white/10 px-3 py-1">98+ universities</span>
-          <span class="rounded-full bg-white/10 px-3 py-1">Scholarship-friendly options</span>
-          <span class="rounded-full bg-white/10 px-3 py-1">Compare & shortlist</span>
+          <span class="rounded-full bg-white/10 px-3 py-1">{{ totalFromApi || filtered.length }}+ universities</span>
+          <span class="rounded-full bg-white/10 px-3 py-1">Admin API connected</span>
         </div>
       </div>
     </section>
@@ -154,8 +176,14 @@ function clearFilters() {
           </h2>
         </div>
         <div class="rounded-full bg-[#F7F8FA] px-4 py-2 text-[13px] font-medium text-ink/55">
-          Showing {{ paginated.length }} on this page
+          <span v-if="loading">Loading...</span>
+          <span v-else>Showing {{ paginated.length }} on this page</span>
         </div>
+      </div>
+
+      <div v-if="error" class="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-[13px] text-red-700 ring-1 ring-red-100">
+        {{ error }}
+        <button type="button" class="ml-3 font-semibold underline" @click="loadUniversities">Retry</button>
       </div>
 
       <div class="grid gap-6 lg:grid-cols-[280px_1fr] lg:gap-8">
@@ -164,7 +192,7 @@ function clearFilters() {
             <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/35">Quick filters</div>
             <div class="mt-4 space-y-3">
               <div>
-                <label class="mb-2 block text-[12px] font-semibold text-ink/45">City</label>
+                <label class="mb-2 block text-[12px] font-semibold text-ink/45">City / Category</label>
                 <select
                   v-model="selectedCity"
                   class="w-full rounded-xl border border-ink/10 bg-[#F7F8FA] px-4 py-3 text-[13px] text-ink outline-none focus:border-crimson"
@@ -179,10 +207,6 @@ function clearFilters() {
                 <input v-model="scholarshipOnly" type="checkbox" class="rounded" @change="page = 1" />
                 Scholarship available
               </label>
-              <label class="flex items-center gap-3 rounded-xl bg-[#F7F8FA] px-4 py-3 text-[13px] text-ink/70">
-                <input v-model="topRankedOnly" type="checkbox" class="rounded" @change="page = 1" />
-                Top ranked (#200 and above)
-              </label>
               <button
                 type="button"
                 class="w-full rounded-xl border border-ink/10 px-4 py-3 text-[13px] font-semibold text-ink transition hover:bg-[#F7F8FA]"
@@ -196,39 +220,41 @@ function clearFilters() {
         </aside>
 
         <div>
-          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div v-if="loading" class="py-16 text-center text-[14px] text-ink/45">Loading universities from admin...</div>
+          <div v-else-if="!paginated.length" class="py-16 text-center text-[14px] text-ink/45">No universities found.</div>
+          <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <UniversityCard v-for="uni in paginated" :key="uni.slug" :university="uni" />
           </div>
 
           <div v-if="totalPages > 1" class="mt-10 space-y-3">
             <div class="flex items-center justify-center">
               <div class="flex max-w-full items-center gap-2 overflow-x-auto pb-1">
-            <button
-              type="button"
-              class="shrink-0 rounded-xl border border-ink/10 bg-white px-4 py-2 text-[13px] disabled:opacity-40"
-              :disabled="page <= 1"
-              @click="goToPage(page - 1)"
-            >
-              Previous
-            </button>
-            <button
-              v-for="p in totalPages"
-              :key="p"
-              type="button"
-              class="shrink-0 rounded-xl px-3.5 py-2 text-[13px] font-semibold"
-              :class="p === page ? 'bg-crimson text-white' : 'border border-ink/10 bg-white'"
-              @click="goToPage(p)"
-            >
-              {{ p }}
-            </button>
-            <button
-              type="button"
-              class="shrink-0 rounded-xl border border-ink/10 bg-white px-4 py-2 text-[13px] disabled:opacity-40"
-              :disabled="page >= totalPages"
-              @click="goToPage(page + 1)"
-            >
-              Next
-            </button>
+                <button
+                  type="button"
+                  class="shrink-0 rounded-xl border border-ink/10 bg-white px-4 py-2 text-[13px] disabled:opacity-40"
+                  :disabled="page <= 1"
+                  @click="goToPage(page - 1)"
+                >
+                  Previous
+                </button>
+                <button
+                  v-for="p in totalPages"
+                  :key="p"
+                  type="button"
+                  class="shrink-0 rounded-xl px-3.5 py-2 text-[13px] font-semibold"
+                  :class="p === page ? 'bg-crimson text-white' : 'border border-ink/10 bg-white'"
+                  @click="goToPage(p)"
+                >
+                  {{ p }}
+                </button>
+                <button
+                  type="button"
+                  class="shrink-0 rounded-xl border border-ink/10 bg-white px-4 py-2 text-[13px] disabled:opacity-40"
+                  :disabled="page >= totalPages"
+                  @click="goToPage(page + 1)"
+                >
+                  Next
+                </button>
               </div>
             </div>
             <div class="text-center text-[12px] text-ink/40">

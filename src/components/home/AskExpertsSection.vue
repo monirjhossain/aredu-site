@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { WHATSAPP, PHONE } from '../../data/site'
+import { useSiteSettings } from '../../composables/useSiteSettings.js'
+
+const { whatsapp: WHATSAPP, phone: PHONE } = useSiteSettings()
 
 const question = ref('')
 const name = ref('')
@@ -33,7 +35,7 @@ function submit() {
   const text = encodeURIComponent(
     `Hello AR Education,\n\nName: ${name.value || '—'}\nPhone: ${phone.value || '—'}\n\nQuestion:\n${question.value}`,
   )
-  window.open(`${WHATSAPP}?text=${text}`, '_blank', 'noopener')
+  window.open(`${WHATSAPP.value}?text=${text}`, '_blank', 'noopener')
   setTimeout(() => {
     sent.value = false
   }, 4000)

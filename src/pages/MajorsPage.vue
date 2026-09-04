@@ -1,12 +1,15 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { FIELD_GROUPS } from '../data/site.js'
-import majors from '../data/majors.json'
+import { fetchMajors } from '../api/majors.js'
 
 const route = useRoute()
 const router = useRouter()
 const searchQuery = ref(route.query.q?.toString() || '')
+const loading = ref(true)
+const error = ref('')
+const majors = ref([])
 
 watch(
   () => route.query.q,
@@ -15,28 +18,34 @@ watch(
   },
 )
 
-function fieldForMajor(name, index) {
-  const lower = name.toLowerCase()
-  if (lower.includes('engineer') || lower.includes('technology') || lower.includes('mechanical')) return 'Engineering & Technology'
-  if (lower.includes('computer') || lower.includes('data') || lower.includes('software')) return 'Computer Science & IT'
-  if (lower.includes('business') || lower.includes('econom')) return 'Business & Economics'
-  if (lower.includes('medic') || lower.includes('pharm') || lower.includes('dental') || lower.includes('clinical')) return 'Agriculture & Life Sciences'
-  if (lower.includes('chinese') || lower.includes('language')) return 'Chinese Language & Preparatory'
-  if (lower.includes('education')) return 'Education'
-  if (lower.includes('law') || lower.includes('social')) return 'Social Sciences & Law'
-  if (lower.includes('art') || lower.includes('design') || lower.includes('media')) return 'Arts, Design & Media'
-  return FIELD_GROUPS[index % FIELD_GROUPS.length]
+async function loadMajors() {
+  loading.value = true
+  error.value = ''
+  try {
+    const result = await fetchMajors({
+      search: searchQuery.value.trim(),
+      perPage: 200,
+    })
+    majors.value = result.items
+  } catch (e) {
+    console.error(e)
+    error.value = e.message || 'Could not load majors'
+    majors.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
-const enriched = computed(() =>
-  majors.map((m, i) => ({ ...m, field: fieldForMajor(m.name, i) })),
-)
+onMounted(loadMajors)
+watch(searchQuery, () => {
+  // keep local filter; API reload on submit
+})
 
 const filtered = computed(() => {
   const field = route.query.field?.toString()
   const q = searchQuery.value.trim().toLowerCase()
 
-  let list = [...enriched.value]
+  let list = [...majors.value]
   if (field) {
     list = list.filter((m) => m.field === field)
   }
@@ -54,6 +63,7 @@ function onSearch() {
       ...(searchQuery.value.trim() ? { q: searchQuery.value.trim() } : {}),
     },
   })
+  loadMajors()
 }
 
 function clearSearch() {
@@ -62,6 +72,7 @@ function clearSearch() {
     path: '/majors',
     query: route.query.field ? { field: route.query.field } : {},
   })
+  loadMajors()
 }
 </script>
 
@@ -119,7 +130,8 @@ function clearSearch() {
         </form>
 
         <div class="mt-6 flex flex-wrap items-center gap-3 text-[12px] text-white/55">
-          <span class="rounded-full bg-white/10 px-3 py-1">{{ filtered.length }} majors</span>
+          <span class="rounded-full bg-white/10 px-3 py-1">{{ loading ? '…' : filtered.length }} majors</span>
+          <span v-if="error" class="rounded-full bg-crimson/80 px-3 py-1 text-white">{{ error }}</span>
           <span class="rounded-full bg-white/10 px-3 py-1">Popular fields</span>
           <span class="rounded-full bg-white/10 px-3 py-1">University planning friendly</span>
         </div>

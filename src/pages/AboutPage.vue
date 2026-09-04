@@ -1,6 +1,8 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { BRAND, WHATSAPP } from '../data/site.js'
+import { useSiteSettings } from '../composables/useSiteSettings.js'
+
+const { brand: BRAND, whatsapp: WHATSAPP } = useSiteSettings()
 
 const team = [
   { initials: 'HA', name: 'MD Hassan Biswas Arnob', role: 'DMD', color: '#D61F26' },

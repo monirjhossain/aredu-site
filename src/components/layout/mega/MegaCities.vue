@@ -1,10 +1,21 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { REGIONS } from '../../../data/site'
-import cities from '../../../data/cities.json'
+import { fetchCities } from '../../../api/cities.js'
 
 defineEmits(['close'])
-const top = cities.slice(0, 8)
+const top = ref([])
+
+onMounted(async () => {
+  try {
+    const result = await fetchCities({ perPage: 8 })
+    top.value = result.items.slice(0, 8)
+  } catch (e) {
+    console.error(e)
+    top.value = []
+  }
+})
 </script>
 
 <template>
@@ -36,7 +47,7 @@ const top = cities.slice(0, 8)
             @click="$emit('close')"
           >
             <span class="text-[13.5px] font-semibold text-ink group-hover:text-jade">{{ c.name }}</span>
-            <span class="shrink-0 text-[11px] text-ink/35">{{ c.universities || 1 }} unis</span>
+            <span class="shrink-0 text-[11px] text-ink/35">{{ c.uniCount || c.universities || 1 }} unis</span>
           </RouterLink>
         </div>
       </div>

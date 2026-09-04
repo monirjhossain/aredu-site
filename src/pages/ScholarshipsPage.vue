@@ -1,7 +1,28 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { SCHOLARSHIP_META, WHATSAPP } from '../data/site.js'
-import scholarships from '../data/scholarships.json'
+import { useSiteSettings } from '../composables/useSiteSettings.js'
+import { fetchScholarships } from '../api/scholarships.js'
+
+const { whatsapp: WHATSAPP } = useSiteSettings()
+
+const loading = ref(true)
+const error = ref('')
+const scholarships = ref([])
+
+onMounted(async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const result = await fetchScholarships({ perPage: 50 })
+    scholarships.value = result.items
+  } catch (e) {
+    console.error(e)
+    error.value = e.message || 'Could not load scholarships'
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
@@ -12,9 +33,14 @@ import scholarships from '../data/scholarships.json'
       <p class="mx-auto mt-2 max-w-xl text-[14px] text-gray-500">
         CSC, provincial and university scholarships — see coverage and which universities offer them.
       </p>
+      <p v-if="error" class="mt-2 text-[13px] text-red-600">{{ error }}</p>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div v-for="n in 6" :key="n" class="h-44 animate-pulse rounded-2xl bg-gray-100" />
+    </div>
+
+    <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <RouterLink
         v-for="sch in scholarships"
         :key="sch.slug"
@@ -26,22 +52,19 @@ import scholarships from '../data/scholarships.json'
             <i class="ti ti-award text-[22px]" style="color: #8a6a16"></i>
           </span>
           <span
-            v-if="SCHOLARSHIP_META[sch.slug]"
             class="rounded-full px-2.5 py-0.5 text-[10px] font-bold"
             style="background: var(--color-secondary); color: white"
           >
-            {{ SCHOLARSHIP_META[sch.slug].coverage }}
+            {{ sch.coverage }}
           </span>
         </div>
         <h2 class="mt-4 text-[16px] font-bold text-[var(--color-secondary)] group-hover:text-[var(--color-primary)]">
           {{ sch.name }}
         </h2>
-        <template v-if="SCHOLARSHIP_META[sch.slug]">
-          <p class="mt-2 text-[13px] leading-relaxed text-gray-500">{{ SCHOLARSHIP_META[sch.slug].desc }}</p>
-          <p class="mt-3 text-[12px] font-semibold text-gray-400">
-            {{ SCHOLARSHIP_META[sch.slug].universities }}+ universities
-          </p>
-        </template>
+        <p class="mt-2 text-[13px] leading-relaxed text-gray-500">{{ sch.desc }}</p>
+        <p class="mt-3 text-[12px] font-semibold text-gray-400">
+          {{ sch.universities }}+ universities
+        </p>
       </RouterLink>
     </div>
 

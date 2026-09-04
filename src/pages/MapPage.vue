@@ -1,19 +1,22 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import universities from '../data/universities.json'
+import { useUniversitiesCatalog } from '../composables/useUniversitiesCatalog.js'
 import UniversityCard from '../components/ui/UniversityCard.vue'
 
 const selectedCity = ref('')
+const { items: universities, loading, load } = useUniversitiesCatalog()
+
+onMounted(() => load())
 
 const cities = computed(() => {
-  const set = new Set(universities.map((u) => u.city).filter(Boolean))
+  const set = new Set(universities.value.map((u) => u.city).filter(Boolean))
   return [...set].sort()
 })
 
 const filtered = computed(() => {
-  if (!selectedCity.value) return universities.slice(0, 20)
-  return universities.filter((u) => u.city === selectedCity.value)
+  if (!selectedCity.value) return universities.value.slice(0, 20)
+  return universities.value.filter((u) => u.city === selectedCity.value)
 })
 </script>
 
@@ -21,11 +24,14 @@ const filtered = computed(() => {
   <div class="site-container py-10">
     <div class="mb-8">
       <h1 class="text-2xl font-extrabold text-[var(--color-secondary)] sm:text-3xl">University map</h1>
-      <p class="mt-2 text-[14px] text-gray-500">Explore universities across China — click a city to filter the list.</p>
+      <p class="mt-2 text-[14px] text-gray-500">
+        Explore universities across China from live admin data —
+        <span v-if="loading">loading…</span>
+        <span v-else>{{ universities.length }} universities.</span>
+      </p>
     </div>
 
     <div class="grid gap-8 lg:grid-cols-[1fr_360px]">
-      <!-- Map placeholder -->
       <div class="relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br from-[#fcebeb] to-white p-8">
         <svg viewBox="0 0 500 350" class="mx-auto w-full" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -59,7 +65,6 @@ const filtered = computed(() => {
         </div>
       </div>
 
-      <!-- University list -->
       <div>
         <div class="mb-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h2 class="text-[15px] font-bold text-[var(--color-secondary)]">
@@ -70,6 +75,7 @@ const filtered = computed(() => {
         </div>
         <div class="max-h-[600px] space-y-3 overflow-y-auto pr-1">
           <UniversityCard v-for="uni in filtered.slice(0, 8)" :key="uni.slug" :university="uni" />
+          <p v-if="!loading && !filtered.length" class="text-[13px] text-gray-400">No universities for this city yet.</p>
         </div>
       </div>
     </div>

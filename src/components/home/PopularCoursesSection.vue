@@ -1,14 +1,60 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { COURSE_FILTERS, POPULAR_COURSES } from '../../data/popularCourses'
+import { fetchMajors } from '../../api/majors.js'
+import { POPULAR_COURSES } from '../../data/popularCourses'
+
+const PALETTE = [
+  { accent: '#E11D2E', soft: '#FCE8EA', icon: 'ti-book' },
+  { accent: '#0F766E', soft: '#E6F4F2', icon: 'ti-code' },
+  { accent: '#0A1628', soft: '#E8EEF4', icon: 'ti-building-bridge' },
+  { accent: '#B45309', soft: '#FEF3C7', icon: 'ti-briefcase' },
+]
 
 const active = ref('All')
 const showAll = ref(false)
+const courses = ref([])
+const loading = ref(false)
+
+function decorate(row, i) {
+  const curated = POPULAR_COURSES.find((c) => c.slug === row.slug)
+  const palette = PALETTE[i % PALETTE.length]
+  const uniCount = row.universities ?? row.uniCount ?? 0
+  return {
+    slug: row.slug,
+    name: row.name,
+    field: row.field || curated?.field || 'General',
+    degree: row.degree || curated?.degree || 'Bachelor',
+    universities: uniCount,
+    demand: uniCount >= 30 ? 'Very High' : uniCount >= 15 ? 'High' : 'Rising',
+    icon: curated?.icon || palette.icon,
+    accent: curated?.accent || palette.accent,
+    soft: curated?.soft || palette.soft,
+  }
+}
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    const result = await fetchMajors({ perPage: 60 })
+    const items = (result.items || []).map(decorate)
+    courses.value = items.length ? items : POPULAR_COURSES.map((c, i) => decorate(c, i))
+  } catch (e) {
+    console.error(e)
+    courses.value = POPULAR_COURSES.map((c, i) => decorate(c, i))
+  } finally {
+    loading.value = false
+  }
+})
+
+const filters = computed(() => {
+  const fields = [...new Set(courses.value.map((c) => c.field).filter(Boolean))]
+  return ['All', ...fields]
+})
 
 const filtered = computed(() => {
-  if (active.value === 'All') return POPULAR_COURSES
-  return POPULAR_COURSES.filter((c) => c.field === active.value)
+  if (active.value === 'All') return courses.value
+  return courses.value.filter((c) => c.field === active.value)
 })
 
 const visible = computed(() => {
@@ -16,7 +62,7 @@ const visible = computed(() => {
   return filtered.value.slice(0, 6)
 })
 
-const total = POPULAR_COURSES.length
+const total = computed(() => courses.value.length)
 </script>
 
 <template>
@@ -24,7 +70,6 @@ const total = POPULAR_COURSES.length
     <div class="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#E8F3F1]/70 to-transparent" />
 
     <div class="relative site-container">
-      <!-- Header -->
       <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div class="max-w-2xl">
           <div class="inline-flex items-center gap-2 rounded-full bg-crimson/10 px-3 py-1.5">
@@ -47,10 +92,9 @@ const total = POPULAR_COURSES.length
         </RouterLink>
       </div>
 
-      <!-- Filters — horizontal scroll on mobile -->
       <div class="mt-8 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-none sm:flex-wrap sm:overflow-visible">
         <button
-          v-for="f in COURSE_FILTERS"
+          v-for="f in filters"
           :key="f"
           type="button"
           class="shrink-0 rounded-full px-4 py-2 text-[12.5px] font-semibold transition"
@@ -65,8 +109,11 @@ const total = POPULAR_COURSES.length
         </button>
       </div>
 
-      <!-- Course grid -->
-      <div class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div v-if="loading && !courses.length" class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div v-for="n in 6" :key="n" class="h-40 animate-pulse rounded-2xl bg-[#F4F6F8]" />
+      </div>
+
+      <div v-else class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <RouterLink
           v-for="(course, i) in visible"
           :key="course.slug"
@@ -123,7 +170,7 @@ const total = POPULAR_COURSES.length
         </RouterLink>
       </div>
 
-      <div v-if="filtered.length === 0" class="mt-10 rounded-2xl bg-[#F4F6F8] py-12 text-center text-[14px] text-ink/45">
+      <div v-if="!loading && filtered.length === 0" class="mt-10 rounded-2xl bg-[#F4F6F8] py-12 text-center text-[14px] text-ink/45">
         No courses in this field yet — try another filter.
       </div>
 

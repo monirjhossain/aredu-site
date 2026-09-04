@@ -1,21 +1,34 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { DEGREES, SCHOLARSHIP_META } from '../../data/site.js'
-import scholarships from '../../data/scholarships.json'
+import { DEGREES } from '../../data/site.js'
+import { fetchScholarships } from '../../api/scholarships.js'
 
 const gpa = ref('')
 const degree = ref('')
 const checked = ref(false)
+const scholarships = ref([])
+const loading = ref(false)
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    const result = await fetchScholarships({ perPage: 50 })
+    scholarships.value = result.items || []
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+})
 
 const matched = computed(() => {
   if (!checked.value) return []
   const score = parseFloat(gpa.value) || 0
-  return scholarships.filter((sch) => {
-    const meta = SCHOLARSHIP_META[sch.slug]
-    if (!meta) return true
-    if (meta.coverage === 'Full' && score < 3.0) return false
-    if (meta.coverage === 'Partial' && score < 2.5) return false
+  return scholarships.value.filter((sch) => {
+    const coverage = String(sch.coverage || '').toLowerCase()
+    if (coverage.includes('full') && score < 3.0) return false
+    if (coverage.includes('partial') && score < 2.5) return false
     return true
   })
 })
@@ -176,14 +189,14 @@ const profileNote = computed(() => {
                 <h3 class="mt-2 font-display text-[1.05rem] font-bold leading-snug text-ink group-hover:text-crimson">{{ sch.name }}</h3>
               </div>
               <span
-                v-if="SCHOLARSHIP_META[sch.slug]"
+                v-if="sch.coverage"
                 class="shrink-0 rounded-full bg-ink px-3 py-1 text-[10px] font-bold text-white"
               >
-                {{ SCHOLARSHIP_META[sch.slug].coverage }}
+                {{ sch.coverage }}
               </span>
             </div>
-            <p v-if="SCHOLARSHIP_META[sch.slug]" class="mt-3 text-[13px] leading-relaxed text-ink/50">
-              {{ SCHOLARSHIP_META[sch.slug].desc }}
+            <p v-if="sch.desc" class="mt-3 text-[13px] leading-relaxed text-ink/50">
+              {{ sch.desc }}
             </p>
             <div class="mt-5 inline-flex items-center gap-1 text-[12.5px] font-semibold text-crimson">
               View scholarship

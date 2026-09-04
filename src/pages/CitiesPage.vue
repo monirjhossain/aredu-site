@@ -1,44 +1,34 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { REGIONS } from '../data/site.js'
-import cities from '../data/cities.json'
-import universities from '../data/universities.json'
+import { fetchCities } from '../api/cities.js'
 import NeedHelpBanner from '../components/ui/NeedHelpBanner.vue'
 
-const regionMap = {
-  beijing: 'North China',
-  shanghai: 'East China',
-  guangzhou: 'South China',
-  shenzhen: 'South China',
-  hangzhou: 'East China',
-  nanjing: 'East China',
-  wuhan: 'Central China',
-  chengdu: 'Southwest China',
-  xian: 'Northwest China',
-  harbin: 'Northeast China',
-  dalian: 'Northeast China',
-  tianjin: 'North China',
-  changchun: 'Northeast China',
-  shenyang: 'Northeast China',
-}
+const loading = ref(true)
+const error = ref('')
+const cities = ref([])
 
-function getRegion(city) {
-  const key = city.slug?.toLowerCase() || city.name?.toLowerCase()
-  return regionMap[key] || REGIONS[Math.abs(key?.charCodeAt(0) || 0) % REGIONS.length].name
-}
-
-const enriched = computed(() => {
-  const counts = {}
-  universities.forEach((u) => {
-    const key = u.city?.toLowerCase()
-    if (key) counts[key] = (counts[key] || 0) + 1
-  })
-  return cities.map((c) => ({
+const enriched = computed(() =>
+  cities.value.map((c) => ({
     ...c,
-    region: getRegion(c),
-    uniCount: counts[c.name.toLowerCase()] || counts[c.slug] || ((c.name.charCodeAt(0) % 4) + 1),
-  }))
+    uniCount: c.uniCount || c.universities || 0,
+  })),
+)
+
+onMounted(async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const result = await fetchCities({ perPage: 200 })
+    cities.value = result.items
+  } catch (e) {
+    console.error(e)
+    error.value = e.message || 'Could not load cities'
+    cities.value = []
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
@@ -48,10 +38,18 @@ const enriched = computed(() => {
       <div>
         <div class="mb-8">
           <h1 class="text-2xl font-extrabold text-[var(--color-secondary)] sm:text-3xl">Study cities in China</h1>
-          <p class="mt-2 text-[14px] text-gray-500">{{ enriched.length }} cities — explore universities, living costs and student life.</p>
+          <p class="mt-2 text-[14px] text-gray-500">
+            <template v-if="loading">Loading cities from admin…</template>
+            <template v-else-if="error">{{ error }}</template>
+            <template v-else>{{ enriched.length }} cities — explore universities, living costs and student life.</template>
+          </p>
         </div>
 
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div v-for="n in 6" :key="n" class="h-28 animate-pulse rounded-2xl bg-gray-100" />
+        </div>
+
+        <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <RouterLink
             v-for="city in enriched"
             :key="city.slug"
@@ -78,7 +76,7 @@ const enriched = computed(() => {
               v-for="region in REGIONS"
               :key="region.slug"
               :to="`/region/${region.slug}`"
-              class="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-600 hover:bg-gray-200"
+              class="rounded-full bg-gray-100 px-3 py-1 text-[12px] font-medium text-gray-600 hover:bg-[var(--color-primary)] hover:text-white"
             >
               {{ region.name }}
             </RouterLink>

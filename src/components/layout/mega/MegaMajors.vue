@@ -1,9 +1,20 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { DEGREES, FIELD_GROUPS } from '../../../data/site'
-import majors from '../../../data/majors.json'
+import { fetchMajors } from '../../../api/majors.js'
 
 defineEmits(['close'])
+const majorCount = ref(0)
+
+onMounted(async () => {
+  try {
+    const result = await fetchMajors({ perPage: 1 })
+    majorCount.value = result.total || 0
+  } catch (e) {
+    majorCount.value = 0
+  }
+})
 </script>
 
 <template>
@@ -19,7 +30,7 @@ defineEmits(['close'])
           class="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink hover:text-crimson"
           @click="$emit('close')"
         >
-          All {{ majors.length }}+ majors
+          All {{ majorCount || '' }}{{ majorCount ? '+' : '' }} majors
           <i class="ti ti-arrow-right text-[14px]"></i>
         </RouterLink>
       </div>

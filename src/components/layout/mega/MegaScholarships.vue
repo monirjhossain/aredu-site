@@ -1,10 +1,20 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { SCHOLARSHIP_META } from '../../../data/site'
-import scholarships from '../../../data/scholarships.json'
+import { fetchScholarships } from '../../../api/scholarships.js'
 
 defineEmits(['close'])
-const featured = scholarships.slice(0, 5)
+const featured = ref([])
+
+onMounted(async () => {
+  try {
+    const result = await fetchScholarships({ perPage: 5 })
+    featured.value = result.items.slice(0, 5)
+  } catch (e) {
+    console.error(e)
+    featured.value = []
+  }
+})
 </script>
 
 <template>
@@ -38,11 +48,11 @@ const featured = scholarships.slice(0, 5)
             <span class="min-w-0">
               <span class="block truncate text-[13.5px] font-semibold text-ink group-hover:text-jade">{{ s.name }}</span>
               <span class="block text-[12px] text-ink/40">
-                {{ SCHOLARSHIP_META[s.slug]?.universities || '—' }}+ universities
+                {{ s.universities || '—' }}+ universities
               </span>
             </span>
             <span class="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-ink/55 ring-1 ring-ink/8">
-              {{ SCHOLARSHIP_META[s.slug]?.coverage || 'Award' }}
+              {{ s.coverage || 'Award' }}
             </span>
           </RouterLink>
         </div>

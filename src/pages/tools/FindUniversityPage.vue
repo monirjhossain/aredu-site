@@ -1,8 +1,8 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { DEGREES } from '../../data/site.js'
-import universities from '../../data/universities.json'
+import { useUniversitiesCatalog } from '../../composables/useUniversitiesCatalog.js'
 import UniversityCard from '../../components/ui/UniversityCard.vue'
 
 const step = ref(1)
@@ -12,6 +12,9 @@ const answers = ref({
   budget: '',
   city: '',
 })
+
+const { items: universities, loading, load } = useUniversitiesCatalog()
+onMounted(() => load())
 
 const fields = [
   'Engineering & Technology',
@@ -38,10 +41,10 @@ const tier1Cities = ['beijing', 'shanghai', 'guangzhou', 'shenzhen', 'hangzhou',
 
 const matched = computed(() => {
   if (step.value < 5) return []
-  let list = [...universities]
+  let list = [...universities.value]
 
   if (answers.value.city === 'tier1') {
-    list = list.filter((u) => tier1Cities.includes(u.city?.toLowerCase()))
+    list = list.filter((u) => tier1Cities.includes((u.city || '').toLowerCase()))
   }
 
   if (answers.value.budget === 'low') {
@@ -51,14 +54,17 @@ const matched = computed(() => {
   }
 
   if (answers.value.field === 'Medicine / MBBS') {
-    list = list.filter((u) => u.name.toLowerCase().includes('medical') || u.name.toLowerCase().includes('medicine'))
+    list = list.filter((u) => /medical|medicine|mbbs/i.test(u.name || ''))
+  } else if (answers.value.field === 'Engineering & Technology') {
+    list = list.filter((u) => /engineer|technolog|polytechnic/i.test(u.name || '') || u.scholarship)
+  } else if (answers.value.field === 'Computer Science & IT') {
+    list = list.filter((u) => /computer|software|information|digital/i.test(u.name || '') || u.scholarship)
   }
 
   list.sort((a, b) => {
-    let score = 0
-    if (a.scholarship) score += 10
-    score += (100 - a.ranking) / 10
-    return score - ((b.scholarship ? 10 : 0) + (100 - b.ranking) / 10)
+    const scoreA = (a.scholarship ? 10 : 0) + (100 - (a.ranking || 50)) / 10
+    const scoreB = (b.scholarship ? 10 : 0) + (100 - (b.ranking || 50)) / 10
+    return scoreB - scoreA
   })
 
   return list.slice(0, 6)
@@ -276,6 +282,7 @@ const cityLabel = computed(() => cityPrefs.find((c) => c.value === answers.value
               <p class="mt-3 max-w-2xl text-[14px] leading-relaxed text-ink/50">
                 Based on <span class="font-semibold text-ink">{{ degreeLabel }}</span>, <span class="font-semibold text-ink">{{ answers.field }}</span>, <span class="font-semibold text-ink">{{ budgetLabel }}</span> and <span class="font-semibold text-ink">{{ cityLabel }}</span>.
               </p>
+              <p v-if="loading" class="mt-2 text-[12px] text-ink/40">Refreshing university list…</p>
             </div>
 
             <button

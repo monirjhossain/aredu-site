@@ -1,8 +1,19 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { SERVICES } from '../../../data/site'
+import { fetchServices } from '../../../api/services.js'
 
 defineEmits(['close'])
+const services = ref([])
+
+onMounted(async () => {
+  try {
+    const result = await fetchServices({ perPage: 10 })
+    services.value = result.items
+  } catch (e) {
+    console.error(e)
+  }
+})
 </script>
 
 <template>
@@ -25,7 +36,7 @@ defineEmits(['close'])
 
       <div class="grid gap-x-8 gap-y-1 sm:grid-cols-2">
         <RouterLink
-          v-for="s in SERVICES"
+          v-for="s in services"
           :key="s.slug"
           :to="`/service/${s.slug}`"
           class="group flex items-start gap-3 border-b border-ink/8 py-3.5"

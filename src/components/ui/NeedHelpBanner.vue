@@ -1,6 +1,8 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { WHATSAPP } from '../../data/site'
+import { useSiteSettings } from '../../composables/useSiteSettings.js'
+
+const { whatsapp: WHATSAPP } = useSiteSettings()
 </script>
 
 <template>

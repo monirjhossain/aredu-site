@@ -1,12 +1,16 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import universities from '../../data/universities.json'
+import { useUniversitiesCatalog } from '../../composables/useUniversitiesCatalog.js'
+
+const ACCENTS = ['#D61F26', '#182640', '#DD9F2B', '#0E7490', '#7C3AED', '#16A34A', '#DB2777', '#B45309']
+
+const { items: universities, load } = useUniversitiesCatalog()
 
 const slides = computed(() =>
-  universities.slice(0, 8).map((u, i) => ({
+  universities.value.slice(0, 8).map((u, i) => ({
     ...u,
-    accent: ['#D61F26', '#182640', '#DD9F2B', '#0E7490', '#7C3AED', '#16A34A', '#DB2777', '#B45309'][i],
+    accent: ACCENTS[i % ACCENTS.length],
   })),
 )
 
@@ -15,10 +19,17 @@ const paused = ref(false)
 let timer = null
 
 const current = computed(() => slides.value[index.value] || slides.value[0])
-const prev = computed(() => slides.value[(index.value - 1 + slides.value.length) % slides.value.length])
-const next = computed(() => slides.value[(index.value + 1) % slides.value.length])
+const prev = computed(() =>
+  slides.value.length
+    ? slides.value[(index.value - 1 + slides.value.length) % slides.value.length]
+    : null,
+)
+const next = computed(() =>
+  slides.value.length ? slides.value[(index.value + 1) % slides.value.length] : null,
+)
 
 function go(i) {
+  if (!slides.value.length) return
   index.value = (i + slides.value.length) % slides.value.length
 }
 
@@ -34,12 +45,16 @@ function stop() {
   timer = null
 }
 
-onMounted(start)
+onMounted(async () => {
+  await load()
+  start()
+})
 onUnmounted(stop)
 </script>
 
 <template>
   <div
+    v-if="slides.length && current"
     class="hero-slider relative isolate overflow-hidden rounded-[28px] border border-gray-200/80 bg-white shadow-[0_20px_60px_-28px_rgba(24,38,64,0.35)]"
     @mouseenter="paused = true"
     @mouseleave="paused = false"
@@ -141,10 +156,19 @@ onUnmounted(stop)
               class="overflow-hidden rounded-[22px] border border-gray-100 bg-white shadow-[0_18px_40px_-20px_rgba(24,38,64,0.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-18px_rgba(24,38,64,0.5)]"
             >
               <div class="relative h-[148px] overflow-hidden sm:h-[160px]" :style="{ background: `linear-gradient(135deg, ${current.accent}, #182640)` }">
-                <div class="absolute inset-0 opacity-30" style="background: radial-gradient(circle at 70% 30%, #fff 0%, transparent 45%)" />
-                <div class="absolute inset-0 flex items-center justify-center">
+                <img
+                  v-if="current.image"
+                  :src="current.image"
+                  :alt="current.name"
+                  loading="lazy"
+                  decoding="async"
+                  class="absolute inset-0 h-full w-full object-cover"
+                />
+                <div v-else class="absolute inset-0 opacity-30" style="background: radial-gradient(circle at 70% 30%, #fff 0%, transparent 45%)" />
+                <div v-if="!current.image" class="absolute inset-0 flex items-center justify-center">
                   <span class="text-[64px] font-extrabold tracking-tight text-white/20 sm:text-[72px]">{{ current.code?.slice(0, 3) }}</span>
                 </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                 <div class="absolute left-4 top-4 flex items-center gap-2">
                   <span v-if="current.ranking" class="rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-bold text-[var(--color-secondary)]">
                     #{{ current.ranking }}

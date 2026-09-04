@@ -1,7 +1,13 @@
 <script setup>
+import { onMounted, ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import { SERVICES, FAQS, WHATSAPP } from '../data/site.js'
+import { useSiteSettings } from '../composables/useSiteSettings.js'
+import { fetchServices } from '../api/services.js'
 import FaqItem from '../components/ui/FaqItem.vue'
+
+const { whatsapp, faqs } = useSiteSettings()
+const services = ref([])
+const loading = ref(true)
 
 const howWeWork = [
   { step: 1, title: 'Free consultation', desc: 'Tell us your background, budget and goals — we shortlist universities and scholarships.' },
@@ -10,7 +16,19 @@ const howWeWork = [
   { step: 4, title: 'Pre-departure', desc: 'Airport pickup coordination, settling-in tips and ongoing support after you land.' },
 ]
 
-const serviceFaqs = FAQS.slice(0, 4)
+const serviceFaqs = computed(() => (faqs.value || []).slice(0, 4))
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    const result = await fetchServices({ perPage: 20 })
+    services.value = result.items
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
@@ -36,7 +54,7 @@ const serviceFaqs = FAQS.slice(0, 4)
               <RouterLink to="/contact" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-[13px] font-semibold text-ink hover:bg-sand sm:w-auto">
                 Talk to a counsellor
               </RouterLink>
-              <a :href="WHATSAPP" target="_blank" rel="noopener" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#16A34A] px-5 py-3 text-[13px] font-semibold text-white hover:brightness-110 sm:w-auto">
+              <a :href="whatsapp" target="_blank" rel="noopener" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#16A34A] px-5 py-3 text-[13px] font-semibold text-white hover:brightness-110 sm:w-auto">
                 <i class="ti ti-brand-whatsapp"></i>
                 WhatsApp us
               </a>
@@ -53,7 +71,7 @@ const serviceFaqs = FAQS.slice(0, 4)
               <div class="mt-1 text-[11px] uppercase tracking-[0.12em] text-white/45">Students</div>
             </div>
             <div class="rounded-2xl bg-white/10 p-5 text-center ring-1 ring-white/10 backdrop-blur">
-              <div class="font-display text-2xl font-extrabold">5</div>
+              <div class="font-display text-2xl font-extrabold">{{ services.length || 5 }}</div>
               <div class="mt-1 text-[11px] uppercase tracking-[0.12em] text-white/45">Core services</div>
             </div>
             <div class="rounded-2xl bg-white/10 p-5 text-center ring-1 ring-white/10 backdrop-blur">
@@ -66,9 +84,12 @@ const serviceFaqs = FAQS.slice(0, 4)
     </section>
 
     <section class="site-container py-10 sm:py-12 lg:py-14">
-      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div v-if="loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div v-for="n in 5" :key="n" class="h-40 animate-pulse rounded-[1.5rem] bg-gray-100" />
+      </div>
+      <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <RouterLink
-          v-for="(svc, i) in SERVICES"
+          v-for="(svc, i) in services"
           :key="svc.slug"
           :to="`/service/${svc.slug}`"
           class="group relative overflow-hidden rounded-[1.5rem] bg-white p-5 ring-1 ring-ink/8 transition duration-300 hover:-translate-y-1.5 hover:shadow-lift hover:ring-crimson/20"
@@ -146,7 +167,7 @@ const serviceFaqs = FAQS.slice(0, 4)
           <RouterLink to="/contact" class="rounded-xl bg-crimson px-5 py-3 text-[13px] font-semibold text-white hover:brightness-110">
             Contact us
           </RouterLink>
-          <a :href="WHATSAPP" target="_blank" rel="noopener" class="rounded-xl bg-[#16A34A] px-5 py-3 text-[13px] font-semibold text-white hover:brightness-110">
+          <a :href="whatsapp" target="_blank" rel="noopener" class="rounded-xl bg-[#16A34A] px-5 py-3 text-[13px] font-semibold text-white hover:brightness-110">
             WhatsApp
           </a>
         </div>

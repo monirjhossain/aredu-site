@@ -1,36 +1,80 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import {
-  TOOLS,
-  SERVICES,
-  DEGREES,
-  FIELD_GROUPS,
-  FAQS,
-  SCHOLARSHIP_META,
-  WHATSAPP,
-  BRAND,
-} from '../data/site.js'
-import scholarships from '../data/scholarships.json'
-import cities from '../data/cities.json'
+import { TOOLS, DEGREES, FIELD_GROUPS, SERVICES, SCHOLARSHIP_META } from '../data/site.js'
+import scholarshipsJson from '../data/scholarships.json'
+import { HOME_CITIES } from '../data/homeFallbacks.js'
+import { fetchCities } from '../api/cities.js'
+import { fetchScholarships } from '../api/scholarships.js'
+import { useSiteSettings } from '../composables/useSiteSettings.js'
 import FaqItem from '../components/ui/FaqItem.vue'
 import StatCounter from '../components/ui/StatCounter.vue'
 import HeroUniSlider from '../components/home/HeroUniSlider.vue'
-import PopularCoursesSection from '../components/home/PopularCoursesSection.vue'
-import PopularUniversitiesSection from '../components/home/PopularUniversitiesSection.vue'
-import AskExpertsSection from '../components/home/AskExpertsSection.vue'
-import GallerySection from '../components/home/GallerySection.vue'
-import VideoShowcaseSection from '../components/home/VideoShowcaseSection.vue'
 
+const PopularCoursesSection = defineAsyncComponent(() => import('../components/home/PopularCoursesSection.vue'))
+const PopularUniversitiesSection = defineAsyncComponent(() => import('../components/home/PopularUniversitiesSection.vue'))
+const AskExpertsSection = defineAsyncComponent(() => import('../components/home/AskExpertsSection.vue'))
+const GallerySection = defineAsyncComponent(() => import('../components/home/GallerySection.vue'))
+const VideoShowcaseSection = defineAsyncComponent(() => import('../components/home/VideoShowcaseSection.vue'))
+
+const { brand, whatsapp, faqs } = useSiteSettings()
 const router = useRouter()
 const searchQuery = ref('')
 
-const featuredCities = computed(() =>
-  cities
-    .map((c) => ({ ...c, uniCount: c.universities || 1 }))
-    .sort((a, b) => b.uniCount - a.uniCount)
-    .slice(0, 5),
+/** Static China university campus slides from /public/images */
+const HERO_BG_SLIDES = [
+  '/images/hero-bg-1.jpg',
+  '/images/hero-bg-2.jpg',
+  '/images/hero-bg-3.jpg',
+  '/images/hero-bg-4.jpg',
+  '/images/hero-bg-5.jpg',
+  '/images/hero-bg-6.jpg',
+]
+const heroBgIndex = ref(0)
+let heroBgTimer = null
+
+// Instant content — never wait for API
+const featuredCities = ref([...HOME_CITIES])
+const scholarships = ref(
+  scholarshipsJson.slice(0, 6).map((s) => ({
+    ...s,
+    coverage: SCHOLARSHIP_META[s.slug]?.coverage || 'Award',
+    universities: SCHOLARSHIP_META[s.slug]?.universities || '—',
+    desc: SCHOLARSHIP_META[s.slug]?.desc || '',
+  })),
 )
+const services = ref([...SERVICES])
+
+onMounted(() => {
+  heroBgTimer = setInterval(() => {
+    heroBgIndex.value = (heroBgIndex.value + 1) % HERO_BG_SLIDES.length
+  }, 5000)
+
+  // Silent upgrade only — UI already full
+  Promise.allSettled([
+    fetchCities({ perPage: 8 }),
+    fetchScholarships({ perPage: 6 }),
+    import('../api/services.js').then((m) => m.fetchServices({ perPage: 6 })),
+  ]).then(([citiesRes, schRes, svcRes]) => {
+    if (citiesRes.status === 'fulfilled' && citiesRes.value.items?.length) {
+      featuredCities.value = citiesRes.value.items
+        .map((c) => ({ ...c, uniCount: c.uniCount || c.universities || 1 }))
+        .sort((a, b) => b.uniCount - a.uniCount)
+        .slice(0, 5)
+    }
+    if (schRes.status === 'fulfilled' && schRes.value.items?.length) {
+      scholarships.value = schRes.value.items
+    }
+    if (svcRes.status === 'fulfilled' && svcRes.value.items?.length) {
+      services.value = svcRes.value.items
+    }
+  })
+})
+
+onUnmounted(() => {
+  if (heroBgTimer) clearInterval(heroBgTimer)
+  heroBgTimer = null
+})
 
 function onSearch() {
   router.push({ path: '/universities', query: { q: searchQuery.value } })
@@ -69,25 +113,40 @@ const howSteps = [
 
 <template>
   <div>
-  <!-- HERO: one composition -->
+  <!-- HERO: static China campus slides + dark read overlay -->
   <section class="relative min-h-[min(92vh,880px)] overflow-hidden text-white">
-    <div class="pointer-events-none absolute inset-0">
-      <img
-        src="https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?auto=format&fit=crop&w=2400&q=80"
-        alt="China cityscape"
-        class="h-full w-full object-cover object-center"
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div
+        v-for="(src, i) in HERO_BG_SLIDES"
+        :key="src"
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-[1400ms] ease-in-out"
+        :class="i === heroBgIndex ? 'opacity-100 scale-105' : 'opacity-0 scale-100'"
+        :style="{ backgroundImage: `url('${src}')` }"
       />
-      <div class="absolute inset-0 bg-[linear-gradient(165deg,rgba(10,22,40,0.88)_0%,rgba(18,35,61,0.78)_48%,rgba(15,28,48,0.9)_100%)]" />
-      <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_85%_20%,rgba(225,29,46,0.18),transparent_55%),radial-gradient(ellipse_60%_50%_at_10%_90%,rgba(15,118,110,0.14),transparent_50%)]" />
     </div>
-    <div class="pointer-events-none absolute inset-0 texture-grid opacity-20" />
-    <div class="pointer-events-none absolute -right-24 top-1/4 h-[420px] w-[420px] animate-float rounded-full bg-crimson/15 blur-3xl" />
+    <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,rgba(8,16,32,0.86)_0%,rgba(10,22,40,0.72)_42%,rgba(10,22,40,0.45)_100%)]" />
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_85%_20%,rgba(225,29,46,0.16),transparent_55%),radial-gradient(ellipse_60%_50%_at_10%_90%,rgba(15,118,110,0.12),transparent_50%)]" />
+    <div class="pointer-events-none absolute inset-0 texture-grid opacity-10" />
+    <div class="pointer-events-none absolute -right-24 top-1/4 h-[420px] w-[420px] rounded-full bg-crimson/15 blur-3xl" />
     <div class="pointer-events-none absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-jade/20 blur-3xl" />
+
+    <!-- Slide dots -->
+    <div class="pointer-events-none absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-1.5 lg:bottom-8">
+      <button
+        v-for="(_, i) in HERO_BG_SLIDES"
+        :key="i"
+        type="button"
+        class="pointer-events-auto h-1.5 rounded-full transition-all duration-300"
+        :class="i === heroBgIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'"
+        :aria-label="`Background slide ${i + 1}`"
+        @click="heroBgIndex = i"
+      />
+    </div>
 
     <div class="relative site-container grid min-h-[min(92vh,880px)] items-end gap-8 pb-12 pt-10 sm:gap-10 sm:pb-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-20 lg:pt-8">
       <div class="reveal">
         <div class="font-display text-[clamp(1.9rem,4.5vw,2.75rem)] font-extrabold leading-tight tracking-tight">
-          {{ BRAND }}
+          {{ brand }}
         </div>
         <h1 class="mt-4 max-w-lg font-display text-[clamp(1.35rem,2.6vw,1.85rem)] font-bold leading-snug text-white/95">
           Study in China,<br />guided from Bangladesh.
@@ -268,7 +327,7 @@ const howSteps = [
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:gap-3">
           <RouterLink
-            v-for="(svc, i) in SERVICES"
+            v-for="(svc, i) in services"
             :key="svc.slug"
             :to="`/service/${svc.slug}`"
             class="group relative flex flex-col rounded-[1.35rem] p-5 ring-1 ring-ink/8 transition duration-300 hover:-translate-y-1.5 hover:shadow-lift hover:ring-crimson/20 sm:p-6"
@@ -677,7 +736,7 @@ const howSteps = [
           >
             <div class="flex items-start justify-between gap-3">
               <span class="rounded-full bg-white/12 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/80">
-                {{ SCHOLARSHIP_META[s.slug]?.coverage || 'Award' }}
+                {{ s.coverage || 'Award' }}
               </span>
               <span class="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">
                 {{ String(i + 1).padStart(2, '0') }}
@@ -687,16 +746,16 @@ const howSteps = [
               {{ s.name }}
             </div>
             <p class="mt-2 text-[12.5px] leading-relaxed text-white/60">
-              {{ SCHOLARSHIP_META[s.slug]?.desc || 'Funding opportunity for international applicants.' }}
+              {{ s.desc || 'Funding opportunity for international applicants.' }}
             </p>
             <div v-if="i === 0" class="mt-6 grid gap-3 grid-cols-2 sm:grid-cols-3">
               <div class="rounded-2xl bg-white/8 px-4 py-3 ring-1 ring-white/10">
                 <div class="text-[10px] uppercase tracking-[0.12em] text-white/35">Coverage</div>
-                <div class="mt-1 text-[13px] font-semibold text-white">{{ SCHOLARSHIP_META[s.slug]?.coverage || 'Award' }}</div>
+                <div class="mt-1 text-[13px] font-semibold text-white">{{ s.coverage || 'Award' }}</div>
               </div>
               <div class="rounded-2xl bg-white/8 px-4 py-3 ring-1 ring-white/10">
                 <div class="text-[10px] uppercase tracking-[0.12em] text-white/35">Universities</div>
-                <div class="mt-1 text-[13px] font-semibold text-white">{{ SCHOLARSHIP_META[s.slug]?.universities || '—' }}</div>
+                <div class="mt-1 text-[13px] font-semibold text-white">{{ s.universities || '—' }}</div>
               </div>
               <div class="rounded-2xl bg-white/8 px-4 py-3 ring-1 ring-white/10">
                 <div class="text-[10px] uppercase tracking-[0.12em] text-white/35">Best for</div>
@@ -705,7 +764,7 @@ const howSteps = [
             </div>
             <div class="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
               <span class="text-[12px] text-white/45">
-                {{ SCHOLARSHIP_META[s.slug]?.universities || '—' }} universities
+                {{ s.universities || '—' }} universities
               </span>
               <span class="inline-flex items-center gap-1 text-[12.5px] font-semibold text-white">
                 View
@@ -725,7 +784,7 @@ const howSteps = [
       <p class="mx-auto mt-3 max-w-md text-[15px] text-ink/55">Answer a few questions — we'll match universities and scholarships free, in minutes.</p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
         <RouterLink to="/tools/find-university" class="btn-primary w-full sm:w-auto">Find my university →</RouterLink>
-        <a :href="WHATSAPP" target="_blank" rel="noopener" class="btn-ghost w-full sm:w-auto">WhatsApp us</a>
+        <a :href="whatsapp" target="_blank" rel="noopener" class="btn-ghost w-full sm:w-auto">WhatsApp us</a>
       </div>
     </div>
   </section>
@@ -890,7 +949,7 @@ const howSteps = [
                 If your question is not listed here, our team can guide you directly in Bangla.
               </p>
               <a
-                :href="WHATSAPP"
+                :href="whatsapp"
                 target="_blank"
                 rel="noopener"
                 class="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-[13px] font-semibold text-ink transition hover:bg-sand"
@@ -904,7 +963,7 @@ const howSteps = [
 
         <div class="bg-[linear-gradient(145deg,rgba(232,238,244,0.55)_0%,rgba(255,255,255,1)_42%,rgba(230,244,242,0.55)_100%)] p-4 sm:p-5 lg:p-6">
           <div class="grid gap-3">
-            <FaqItem v-for="faq in FAQS" :key="faq.q" :q="faq.q" :a="faq.a" />
+            <FaqItem v-for="faq in faqs" :key="faq.q" :q="faq.q" :a="faq.a" />
           </div>
         </div>
       </div>
@@ -918,7 +977,7 @@ const howSteps = [
         <div class="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Ready to study in China?</div>
         <p class="mx-auto mt-3 max-w-lg text-[15px] text-white/60">Free counselling in Bangla — pick a university, apply, win a scholarship, reach class day one.</p>
         <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-          <a :href="WHATSAPP" target="_blank" rel="noopener" class="btn-primary w-full sm:w-auto">Chat on WhatsApp</a>
+          <a :href="whatsapp" target="_blank" rel="noopener" class="btn-primary w-full sm:w-auto">Chat on WhatsApp</a>
           <RouterLink to="/tools/find-university" class="btn-ghost w-full border-white/20 bg-white/10 text-white hover:bg-white/15 sm:w-auto">Find my university</RouterLink>
         </div>
       </div>
