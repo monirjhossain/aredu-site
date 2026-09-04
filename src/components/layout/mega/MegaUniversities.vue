@@ -1,0 +1,70 @@
+<script setup>
+import { RouterLink } from 'vue-router'
+import { REGIONS } from '../../../data/site'
+import universities from '../../../data/universities.json'
+
+defineEmits(['close'])
+const featured = universities.slice(0, 5)
+</script>
+
+<template>
+  <div class="site-container">
+    <div class="grid gap-8 lg:grid-cols-[200px_1fr_220px]">
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-crimson">Universities</div>
+        <p class="mt-3 text-[13px] leading-relaxed text-ink/50">
+          Shortlist campuses by ranking, city and scholarship fit.
+        </p>
+        <RouterLink
+          to="/universities"
+          class="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink hover:text-crimson"
+          @click="$emit('close')"
+        >
+          Browse directory
+          <i class="ti ti-arrow-right text-[14px]"></i>
+        </RouterLink>
+      </div>
+
+      <div>
+        <div class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/35">Featured</div>
+        <div class="divide-y divide-ink/8 border-y border-ink/8">
+          <RouterLink
+            v-for="u in featured"
+            :key="u.slug"
+            :to="`/university/${u.slug}`"
+            class="group flex items-center justify-between gap-4 py-3 transition hover:bg-white/70"
+            @click="$emit('close')"
+          >
+            <span class="min-w-0">
+              <span class="block truncate text-[13.5px] font-semibold text-ink group-hover:text-crimson">{{ u.name }}</span>
+              <span class="block text-[12px] text-ink/40">{{ u.city }} · #{{ u.ranking }}</span>
+            </span>
+            <span class="shrink-0 rounded-md bg-ink px-2 py-1 text-[10px] font-bold text-white">{{ u.code?.slice(0, 3) }}</span>
+          </RouterLink>
+        </div>
+      </div>
+
+      <div class="space-y-5">
+        <div>
+          <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/35">Regions</div>
+          <div class="space-y-1.5">
+            <RouterLink
+              v-for="r in REGIONS.slice(0, 5)"
+              :key="r.slug"
+              :to="`/region/${r.slug}`"
+              class="block text-[13px] font-medium text-ink/65 transition hover:text-crimson"
+              @click="$emit('close')"
+            >{{ r.name }}</RouterLink>
+          </div>
+        </div>
+        <div class="rounded-xl bg-ink px-4 py-4 text-white">
+          <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">Quick start</div>
+          <div class="mt-1 text-[13px] font-semibold">Not sure where to apply?</div>
+          <RouterLink to="/tools/find-university" class="mt-3 inline-flex text-[12px] font-semibold text-white underline-offset-2 hover:underline" @click="$emit('close')">
+            Use finder tool →
+          </RouterLink>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

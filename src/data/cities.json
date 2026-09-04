@@ -1,0 +1,366 @@
+﻿[
+    {
+        "slug":  "shijiazhuang",
+        "name":  "Shijiazhuang",
+        "region":  "East China",
+        "universities":  7,
+        "desc":  "Shijiazhuang is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "taiyuan",
+        "name":  "Taiyuan",
+        "region":  "North China",
+        "universities":  6,
+        "desc":  "Taiyuan is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "changchun",
+        "name":  "Changchun",
+        "region":  "Central China",
+        "universities":  5,
+        "desc":  "Changchun is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "jinzhou",
+        "name":  "Jinzhou",
+        "region":  "Northeast China",
+        "universities":  4,
+        "desc":  "Jinzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "changzhou",
+        "name":  "Changzhou",
+        "region":  "Northwest China",
+        "universities":  3,
+        "desc":  "Changzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "huaian",
+        "name":  "Huaian",
+        "region":  "South China",
+        "universities":  2,
+        "desc":  "Huaian is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "zhenjiang",
+        "name":  "Zhenjiang",
+        "region":  "Southwest China",
+        "universities":  1,
+        "desc":  "Zhenjiang is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "huzhou",
+        "name":  "Huzhou",
+        "region":  "East China",
+        "universities":  7,
+        "desc":  "Huzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "jiaxing",
+        "name":  "Jiaxing",
+        "region":  "North China",
+        "universities":  6,
+        "desc":  "Jiaxing is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "jinhua",
+        "name":  "Jinhua",
+        "region":  "Central China",
+        "universities":  5,
+        "desc":  "Jinhua is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "lishui",
+        "name":  "Lishui",
+        "region":  "Northeast China",
+        "universities":  4,
+        "desc":  "Lishui is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "shaoxing",
+        "name":  "Shaoxing",
+        "region":  "Northwest China",
+        "universities":  3,
+        "desc":  "Shaoxing is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "shenyang",
+        "name":  "Shenyang",
+        "region":  "South China",
+        "universities":  2,
+        "desc":  "Shenyang is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "shanghai",
+        "name":  "Shanghai",
+        "region":  "Southwest China",
+        "universities":  1,
+        "desc":  "Shanghai is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "harbin",
+        "name":  "Harbin",
+        "region":  "East China",
+        "universities":  7,
+        "desc":  "Harbin is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "xuzhou",
+        "name":  "Xuzhou",
+        "region":  "North China",
+        "universities":  6,
+        "desc":  "Xuzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "hangzhou",
+        "name":  "Hangzhou",
+        "region":  "Central China",
+        "universities":  5,
+        "desc":  "Hangzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "yangzhou",
+        "name":  "Yangzhou",
+        "region":  "Northeast China",
+        "universities":  4,
+        "desc":  "Yangzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "hefei",
+        "name":  "Hefei",
+        "region":  "Northwest China",
+        "universities":  3,
+        "desc":  "Hefei is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "nanchang",
+        "name":  "Nanchang",
+        "region":  "South China",
+        "universities":  2,
+        "desc":  "Nanchang is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "wenzhou",
+        "name":  "Wenzhou",
+        "region":  "Southwest China",
+        "universities":  1,
+        "desc":  "Wenzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "fuzhou",
+        "name":  "Fuzhou",
+        "region":  "East China",
+        "universities":  7,
+        "desc":  "Fuzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "zhengzhou",
+        "name":  "Zhengzhou",
+        "region":  "North China",
+        "universities":  6,
+        "desc":  "Zhengzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "zibo",
+        "name":  "Zibo",
+        "region":  "Central China",
+        "universities":  5,
+        "desc":  "Zibo is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "chongqing",
+        "name":  "Chongqing",
+        "region":  "Northeast China",
+        "universities":  4,
+        "desc":  "Chongqing is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "chengdu",
+        "name":  "Chengdu",
+        "region":  "Northwest China",
+        "universities":  3,
+        "desc":  "Chengdu is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "beijing",
+        "name":  "Beijing",
+        "region":  "South China",
+        "universities":  2,
+        "desc":  "Beijing is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "tianjin",
+        "name":  "Tianjin",
+        "region":  "Southwest China",
+        "universities":  1,
+        "desc":  "Tianjin is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "jinan",
+        "name":  "Jinan",
+        "region":  "East China",
+        "universities":  7,
+        "desc":  "Jinan is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "wuhan",
+        "name":  "Wuhan",
+        "region":  "North China",
+        "universities":  6,
+        "desc":  "Wuhan is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "jian",
+        "name":  "Jian",
+        "region":  "Central China",
+        "universities":  5,
+        "desc":  "Jian is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "qingdao",
+        "name":  "Qingdao",
+        "region":  "Northeast China",
+        "universities":  4,
+        "desc":  "Qingdao is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "changsha",
+        "name":  "Changsha",
+        "region":  "Northwest China",
+        "universities":  3,
+        "desc":  "Changsha is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "hengyang",
+        "name":  "Hengyang",
+        "region":  "South China",
+        "universities":  2,
+        "desc":  "Hengyang is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "guangzhou",
+        "name":  "Guangzhou",
+        "region":  "Southwest China",
+        "universities":  1,
+        "desc":  "Guangzhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "hechi",
+        "name":  "Hechi",
+        "region":  "East China",
+        "universities":  7,
+        "desc":  "Hechi is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "sanya",
+        "name":  "Sanya",
+        "region":  "North China",
+        "universities":  6,
+        "desc":  "Sanya is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "kunming",
+        "name":  "Kunming",
+        "region":  "Central China",
+        "universities":  5,
+        "desc":  "Kunming is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "baoding",
+        "name":  "Baoding",
+        "region":  "Northeast China",
+        "universities":  4,
+        "desc":  "Baoding is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "xian",
+        "name":  "Xian",
+        "region":  "Northwest China",
+        "universities":  3,
+        "desc":  "Xian is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "yinchuan",
+        "name":  "Yinchuan",
+        "region":  "South China",
+        "universities":  2,
+        "desc":  "Yinchuan is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "dalian",
+        "name":  "Dalian",
+        "region":  "Southwest China",
+        "universities":  1,
+        "desc":  "Dalian is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "nantong",
+        "name":  "Nantong",
+        "region":  "East China",
+        "universities":  7,
+        "desc":  "Nantong is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "nanning",
+        "name":  "Nanning",
+        "region":  "North China",
+        "universities":  6,
+        "desc":  "Nanning is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "nanjing",
+        "name":  "Nanjing",
+        "region":  "Central China",
+        "universities":  5,
+        "desc":  "Nanjing is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "ningbo",
+        "name":  "Ningbo",
+        "region":  "Northeast China",
+        "universities":  4,
+        "desc":  "Ningbo is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "guilin",
+        "name":  "Guilin",
+        "region":  "Northwest China",
+        "universities":  3,
+        "desc":  "Guilin is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "taizhou",
+        "name":  "Taizhou",
+        "region":  "South China",
+        "universities":  2,
+        "desc":  "Taizhou is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "linyi",
+        "name":  "Linyi",
+        "region":  "Southwest China",
+        "universities":  1,
+        "desc":  "Linyi is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "zaozhuang",
+        "name":  "Zaozhuang",
+        "region":  "East China",
+        "universities":  7,
+        "desc":  "Zaozhuang is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "shenzhen",
+        "name":  "Shenzhen",
+        "region":  "North China",
+        "universities":  6,
+        "desc":  "Shenzhen is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    },
+    {
+        "slug":  "guiyang",
+        "name":  "Guiyang",
+        "region":  "Central China",
+        "universities":  5,
+        "desc":  "Guiyang is a popular study destination for Bangladeshi students, with universities, affordable living, and a growing community."
+    }
+]

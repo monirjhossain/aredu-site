@@ -1,0 +1,982 @@
+﻿[
+    {
+        "slug":  "ningbo-university-of-technology",
+        "name":  "Ningbo University Of Technology",
+        "code":  "NUOT",
+        "city":  "Beijing",
+        "province":  "Beijing",
+        "ranking":  7,
+        "views":  100,
+        "scholarship":  true
+    },
+    {
+        "slug":  "jilin-agricultureal-uniersity",
+        "name":  "Jilin Agricultureal Uniersity",
+        "code":  "JAU",
+        "city":  "Shanghai",
+        "province":  "Shanghai",
+        "ranking":  15,
+        "views":  99,
+        "scholarship":  true
+    },
+    {
+        "slug":  "hainan-tropical-ocean-university",
+        "name":  "Hainan Tropical Ocean University",
+        "code":  "HTOU",
+        "city":  "Wuhan",
+        "province":  "Hubei",
+        "ranking":  23,
+        "views":  98,
+        "scholarship":  false
+    },
+    {
+        "slug":  "northwestern-polytechnical-university",
+        "name":  "Northwestern Polytechnical University",
+        "code":  "NPU",
+        "city":  "Nanjing",
+        "province":  "Jiangsu",
+        "ranking":  31,
+        "views":  97,
+        "scholarship":  true
+    },
+    {
+        "slug":  "jinzhou-medical-university",
+        "name":  "Jinzhou Medical University",
+        "code":  "JMU",
+        "city":  "Tianjin",
+        "province":  "Tianjin",
+        "ranking":  39,
+        "views":  96,
+        "scholarship":  true
+    },
+    {
+        "slug":  "huaiyin-institute-of-technology-huaiyin-university",
+        "name":  "Huaiyin Institute Of Technology Huaiyin University",
+        "code":  "HIOTH",
+        "city":  "Harbin",
+        "province":  "Heilongjiang",
+        "ranking":  47,
+        "views":  95,
+        "scholarship":  false
+    },
+    {
+        "slug":  "jianghan-university",
+        "name":  "Jianghan University",
+        "code":  "JU",
+        "city":  "Dalian",
+        "province":  "Liaoning",
+        "ranking":  55,
+        "views":  94,
+        "scholarship":  true
+    },
+    {
+        "slug":  "jiangsu-university-of-science-and-technology",
+        "name":  "Jiangsu University Of Science And Technology",
+        "code":  "JUOSA",
+        "city":  "Shenzhen",
+        "province":  "Guangdong",
+        "ranking":  63,
+        "views":  93,
+        "scholarship":  true
+    },
+    {
+        "slug":  "jiaxing-university",
+        "name":  "Jiaxing University",
+        "code":  "JU",
+        "city":  "Xi\u0027an",
+        "province":  "Shaanxi",
+        "ranking":  71,
+        "views":  92,
+        "scholarship":  false
+    },
+    {
+        "slug":  "shenyang-city-university",
+        "name":  "Shenyang City University",
+        "code":  "SCU",
+        "city":  "Hangzhou",
+        "province":  "Zhejiang",
+        "ranking":  79,
+        "views":  91,
+        "scholarship":  true
+    },
+    {
+        "slug":  "sichuan-university",
+        "name":  "Sichuan University",
+        "code":  "SU",
+        "city":  "Chengdu",
+        "province":  "Sichuan",
+        "ranking":  87,
+        "views":  90,
+        "scholarship":  true
+    },
+    {
+        "slug":  "harbin-institute-of-technology-shenzhen",
+        "name":  "Harbin Institute Of Technology Shenzhen",
+        "code":  "HIOTS",
+        "city":  "Guangzhou",
+        "province":  "Guangdong",
+        "ranking":  95,
+        "views":  89,
+        "scholarship":  false
+    },
+    {
+        "slug":  "jiangsu-normal-university",
+        "name":  "Jiangsu Normal University",
+        "code":  "JNU",
+        "city":  "Qingdao",
+        "province":  "Shandong",
+        "ranking":  103,
+        "views":  88,
+        "scholarship":  true
+    },
+    {
+        "slug":  "shandong-university-of-technology",
+        "name":  "Shandong University Of Technology",
+        "code":  "SUOT",
+        "city":  "Fuzhou",
+        "province":  "Fujian",
+        "ranking":  98,
+        "views":  87,
+        "scholarship":  true
+    },
+    {
+        "slug":  "chengdu-normal-university",
+        "name":  "Chengdu Normal University",
+        "code":  "CNU",
+        "city":  "Changchun",
+        "province":  "Jilin",
+        "ranking":  106,
+        "views":  86,
+        "scholarship":  false
+    },
+    {
+        "slug":  "fujian-medical-university",
+        "name":  "Fujian Medical University",
+        "code":  "FMU",
+        "city":  "Hefei",
+        "province":  "Anhui",
+        "ranking":  114,
+        "views":  85,
+        "scholarship":  true
+    },
+    {
+        "slug":  "shandong-jianzhu-university",
+        "name":  "Shandong Jianzhu University",
+        "code":  "SJU",
+        "city":  "Zhengzhou",
+        "province":  "Henan",
+        "ranking":  122,
+        "views":  84,
+        "scholarship":  true
+    },
+    {
+        "slug":  "ningbo-university",
+        "name":  "Ningbo University",
+        "code":  "NU",
+        "city":  "Kunming",
+        "province":  "Yunnan",
+        "ranking":  130,
+        "views":  83,
+        "scholarship":  false
+    },
+    {
+        "slug":  "southern-medical-university",
+        "name":  "Southern Medical University",
+        "code":  "SMU",
+        "city":  "Ningbo",
+        "province":  "Zhejiang",
+        "ranking":  138,
+        "views":  82,
+        "scholarship":  true
+    },
+    {
+        "slug":  "hebei-university",
+        "name":  "Hebei University",
+        "code":  "HU",
+        "city":  "Xuzhou",
+        "province":  "Jiangsu",
+        "ranking":  146,
+        "views":  81,
+        "scholarship":  true
+    },
+    {
+        "slug":  "fudan-university",
+        "name":  "Fudan University",
+        "code":  "FU",
+        "city":  "Beijing",
+        "province":  "Beijing",
+        "ranking":  154,
+        "views":  80,
+        "scholarship":  false
+    },
+    {
+        "slug":  "shaoxing-university",
+        "name":  "Shaoxing University",
+        "code":  "SU",
+        "city":  "Shanghai",
+        "province":  "Shanghai",
+        "ranking":  162,
+        "views":  79,
+        "scholarship":  true
+    },
+    {
+        "slug":  "fuzhou-university-of-international-studies-and-trade",
+        "name":  "Fuzhou University Of International Studies And Trade",
+        "code":  "FUOIS",
+        "city":  "Wuhan",
+        "province":  "Hubei",
+        "ranking":  170,
+        "views":  78,
+        "scholarship":  true
+    },
+    {
+        "slug":  "jinling-institute-of-technology",
+        "name":  "Jinling Institute Of Technology",
+        "code":  "JIOT",
+        "city":  "Nanjing",
+        "province":  "Jiangsu",
+        "ranking":  178,
+        "views":  77,
+        "scholarship":  false
+    },
+    {
+        "slug":  "minjiang-university",
+        "name":  "Minjiang University",
+        "code":  "MU",
+        "city":  "Tianjin",
+        "province":  "Tianjin",
+        "ranking":  186,
+        "views":  76,
+        "scholarship":  true
+    },
+    {
+        "slug":  "beihang-university",
+        "name":  "Beihang University",
+        "code":  "BU",
+        "city":  "Harbin",
+        "province":  "Heilongjiang",
+        "ranking":  194,
+        "views":  75,
+        "scholarship":  true
+    },
+    {
+        "slug":  "hangzhou-dianzi-university",
+        "name":  "Hangzhou Dianzi University",
+        "code":  "HDU",
+        "city":  "Dalian",
+        "province":  "Liaoning",
+        "ranking":  189,
+        "views":  74,
+        "scholarship":  false
+    },
+    {
+        "slug":  "tianjin-chengjian-university",
+        "name":  "Tianjin Chengjian University",
+        "code":  "TCU",
+        "city":  "Shenzhen",
+        "province":  "Guangdong",
+        "ranking":  197,
+        "views":  73,
+        "scholarship":  true
+    },
+    {
+        "slug":  "huazhong-university-of-science-and-technology",
+        "name":  "Huazhong University Of Science And Technology",
+        "code":  "HUOSA",
+        "city":  "Xi\u0027an",
+        "province":  "Shaanxi",
+        "ranking":  205,
+        "views":  72,
+        "scholarship":  true
+    },
+    {
+        "slug":  "chongqing-university-of-technology",
+        "name":  "Chongqing University Of Technology",
+        "code":  "CUOT",
+        "city":  "Hangzhou",
+        "province":  "Zhejiang",
+        "ranking":  213,
+        "views":  71,
+        "scholarship":  false
+    },
+    {
+        "slug":  "yunnan-university",
+        "name":  "Yunnan University",
+        "code":  "YU",
+        "city":  "Chengdu",
+        "province":  "Sichuan",
+        "ranking":  221,
+        "views":  70,
+        "scholarship":  true
+    },
+    {
+        "slug":  "hechi-university",
+        "name":  "Hechi University",
+        "code":  "HU",
+        "city":  "Guangzhou",
+        "province":  "Guangdong",
+        "ranking":  229,
+        "views":  69,
+        "scholarship":  true
+    },
+    {
+        "slug":  "beijing-university-of-chemical-technology",
+        "name":  "Beijing University Of Chemical Technology",
+        "code":  "BUOCT",
+        "city":  "Qingdao",
+        "province":  "Shandong",
+        "ranking":  237,
+        "views":  68,
+        "scholarship":  false
+    },
+    {
+        "slug":  "wuchang-university-of-technology",
+        "name":  "Wuchang University Of Technology",
+        "code":  "WUOT",
+        "city":  "Fuzhou",
+        "province":  "Fujian",
+        "ranking":  245,
+        "views":  67,
+        "scholarship":  true
+    },
+    {
+        "slug":  "china-university-of-petroleum-beijing",
+        "name":  "China University Of Petroleum Beijing",
+        "code":  "CUOPB",
+        "city":  "Changchun",
+        "province":  "Jilin",
+        "ranking":  253,
+        "views":  66,
+        "scholarship":  true
+    },
+    {
+        "slug":  "zhejiang-normal-university",
+        "name":  "Zhejiang Normal University",
+        "code":  "ZNU",
+        "city":  "Hefei",
+        "province":  "Anhui",
+        "ranking":  261,
+        "views":  65,
+        "scholarship":  false
+    },
+    {
+        "slug":  "changzhou-university",
+        "name":  "Changzhou University",
+        "code":  "CU",
+        "city":  "Zhengzhou",
+        "province":  "Henan",
+        "ranking":  269,
+        "views":  64,
+        "scholarship":  true
+    },
+    {
+        "slug":  "china-pharmaceutical-university",
+        "name":  "China Pharmaceutical University",
+        "code":  "CPU",
+        "city":  "Kunming",
+        "province":  "Yunnan",
+        "ranking":  277,
+        "views":  63,
+        "scholarship":  true
+    },
+    {
+        "slug":  "zhejiang-university-of-finance-and-economics",
+        "name":  "Zhejiang University Of Finance And Economics",
+        "code":  "ZUOFA",
+        "city":  "Ningbo",
+        "province":  "Zhejiang",
+        "ranking":  285,
+        "views":  62,
+        "scholarship":  false
+    },
+    {
+        "slug":  "shanghai-university-of-electric-power",
+        "name":  "Shanghai University Of Electric Power",
+        "code":  "SUOEP",
+        "city":  "Xuzhou",
+        "province":  "Jiangsu",
+        "ranking":  280,
+        "views":  61,
+        "scholarship":  true
+    },
+    {
+        "slug":  "shanghai-university-of-engineering-science",
+        "name":  "Shanghai University Of Engineering Science",
+        "code":  "SUOES",
+        "city":  "Beijing",
+        "province":  "Beijing",
+        "ranking":  288,
+        "views":  60,
+        "scholarship":  true
+    },
+    {
+        "slug":  "hebei-university-of-science-and-technology",
+        "name":  "Hebei University Of Science And Technology",
+        "code":  "HUOSA",
+        "city":  "Shanghai",
+        "province":  "Shanghai",
+        "ranking":  296,
+        "views":  59,
+        "scholarship":  false
+    },
+    {
+        "slug":  "zhejiang-university-of-technology",
+        "name":  "Zhejiang University Of Technology",
+        "code":  "ZUOT",
+        "city":  "Wuhan",
+        "province":  "Hubei",
+        "ranking":  304,
+        "views":  58,
+        "scholarship":  true
+    },
+    {
+        "slug":  "huzhou-normal-university",
+        "name":  "Huzhou Normal University",
+        "code":  "HNU",
+        "city":  "Nanjing",
+        "province":  "Jiangsu",
+        "ranking":  312,
+        "views":  57,
+        "scholarship":  true
+    },
+    {
+        "slug":  "zhejiang-university-of-science-and-technology",
+        "name":  "Zhejiang University Of Science And Technology",
+        "code":  "ZUOSA",
+        "city":  "Tianjin",
+        "province":  "Tianjin",
+        "ranking":  320,
+        "views":  56,
+        "scholarship":  false
+    },
+    {
+        "slug":  "kunming-medical-university",
+        "name":  "Kunming Medical University",
+        "code":  "KMU",
+        "city":  "Harbin",
+        "province":  "Heilongjiang",
+        "ranking":  328,
+        "views":  55,
+        "scholarship":  true
+    },
+    {
+        "slug":  "xidian-university",
+        "name":  "Xidian University",
+        "code":  "XU",
+        "city":  "Dalian",
+        "province":  "Liaoning",
+        "ranking":  336,
+        "views":  54,
+        "scholarship":  true
+    },
+    {
+        "slug":  "shanghai-polytechnic-university",
+        "name":  "Shanghai Polytechnic University",
+        "code":  "SPU",
+        "city":  "Shenzhen",
+        "province":  "Guangdong",
+        "ranking":  344,
+        "views":  53,
+        "scholarship":  false
+    },
+    {
+        "slug":  "guilin-university-of-electronic-technology",
+        "name":  "Guilin University Of Electronic Technology",
+        "code":  "GUOET",
+        "city":  "Xi\u0027an",
+        "province":  "Shaanxi",
+        "ranking":  352,
+        "views":  52,
+        "scholarship":  true
+    },
+    {
+        "slug":  "shanghai-university",
+        "name":  "Shanghai University",
+        "code":  "SU",
+        "city":  "Hangzhou",
+        "province":  "Zhejiang",
+        "ranking":  360,
+        "views":  51,
+        "scholarship":  true
+    },
+    {
+        "slug":  "jiangsu-university",
+        "name":  "Jiangsu University",
+        "code":  "JU",
+        "city":  "Chengdu",
+        "province":  "Sichuan",
+        "ranking":  368,
+        "views":  50,
+        "scholarship":  false
+    },
+    {
+        "slug":  "nanjing-medical-university",
+        "name":  "Nanjing Medical University",
+        "code":  "NMU",
+        "city":  "Guangzhou",
+        "province":  "Guangdong",
+        "ranking":  376,
+        "views":  49,
+        "scholarship":  true
+    },
+    {
+        "slug":  "hubei-university-of-economics",
+        "name":  "Hubei University Of Economics",
+        "code":  "HUOE",
+        "city":  "Qingdao",
+        "province":  "Shandong",
+        "ranking":  371,
+        "views":  48,
+        "scholarship":  true
+    },
+    {
+        "slug":  "tiangong-university",
+        "name":  "Tiangong University",
+        "code":  "TU",
+        "city":  "Fuzhou",
+        "province":  "Fujian",
+        "ranking":  379,
+        "views":  47,
+        "scholarship":  false
+    },
+    {
+        "slug":  "taiyuan-university-of-technology",
+        "name":  "Taiyuan University Of Technology",
+        "code":  "TUOT",
+        "city":  "Changchun",
+        "province":  "Jilin",
+        "ranking":  387,
+        "views":  46,
+        "scholarship":  true
+    },
+    {
+        "slug":  "liaoning-university-of-technology",
+        "name":  "Liaoning University Of Technology",
+        "code":  "LUOT",
+        "city":  "Hefei",
+        "province":  "Anhui",
+        "ranking":  395,
+        "views":  45,
+        "scholarship":  true
+    },
+    {
+        "slug":  "nanjing-university-of-information-science-and-technology",
+        "name":  "Nanjing University Of Information Science And Technology",
+        "code":  "NUOIS",
+        "city":  "Zhengzhou",
+        "province":  "Henan",
+        "ranking":  403,
+        "views":  44,
+        "scholarship":  false
+    },
+    {
+        "slug":  "china-university-of-petroleum-east-china",
+        "name":  "China University Of Petroleum East China",
+        "code":  "CUOPE",
+        "city":  "Kunming",
+        "province":  "Yunnan",
+        "ranking":  411,
+        "views":  43,
+        "scholarship":  true
+    },
+    {
+        "slug":  "southwest-university-of-finance-and-economics",
+        "name":  "Southwest University Of Finance And Economics",
+        "code":  "SUOFA",
+        "city":  "Ningbo",
+        "province":  "Zhejiang",
+        "ranking":  419,
+        "views":  42,
+        "scholarship":  true
+    },
+    {
+        "slug":  "zhengzhou-university",
+        "name":  "Zhengzhou University",
+        "code":  "ZU",
+        "city":  "Xuzhou",
+        "province":  "Jiangsu",
+        "ranking":  427,
+        "views":  41,
+        "scholarship":  false
+    },
+    {
+        "slug":  "linyi-university",
+        "name":  "Linyi University",
+        "code":  "LU",
+        "city":  "Beijing",
+        "province":  "Beijing",
+        "ranking":  435,
+        "views":  40,
+        "scholarship":  true
+    },
+    {
+        "slug":  "nantong-university",
+        "name":  "Nantong University",
+        "code":  "NU",
+        "city":  "Shanghai",
+        "province":  "Shanghai",
+        "ranking":  443,
+        "views":  39,
+        "scholarship":  true
+    },
+    {
+        "slug":  "yangtze-normal-university",
+        "name":  "Yangtze Normal University",
+        "code":  "YNU",
+        "city":  "Wuhan",
+        "province":  "Hubei",
+        "ranking":  451,
+        "views":  38,
+        "scholarship":  false
+    },
+    {
+        "slug":  "hefei-university-of-technology",
+        "name":  "Hefei University Of Technology",
+        "code":  "HUOT",
+        "city":  "Nanjing",
+        "province":  "Jiangsu",
+        "ranking":  459,
+        "views":  37,
+        "scholarship":  true
+    },
+    {
+        "slug":  "china-university-of-mining-and-technology",
+        "name":  "China University Of Mining And Technology",
+        "code":  "CUOMA",
+        "city":  "Tianjin",
+        "province":  "Tianjin",
+        "ranking":  467,
+        "views":  36,
+        "scholarship":  true
+    },
+    {
+        "slug":  "hebei-university-of-technology",
+        "name":  "Hebei University Of Technology",
+        "code":  "HUOT",
+        "city":  "Harbin",
+        "province":  "Heilongjiang",
+        "ranking":  462,
+        "views":  35,
+        "scholarship":  false
+    },
+    {
+        "slug":  "harbin-engineering-university",
+        "name":  "Harbin Engineering University",
+        "code":  "HEU",
+        "city":  "Dalian",
+        "province":  "Liaoning",
+        "ranking":  470,
+        "views":  34,
+        "scholarship":  true
+    },
+    {
+        "slug":  "nanjing-university-of-posts-and-telecommunications",
+        "name":  "Nanjing University Of Posts And Telecommunications",
+        "code":  "NUOPA",
+        "city":  "Shenzhen",
+        "province":  "Guangdong",
+        "ranking":  478,
+        "views":  33,
+        "scholarship":  true
+    },
+    {
+        "slug":  "east-china-university-of-technology",
+        "name":  "East China University Of Technology",
+        "code":  "ECUOT",
+        "city":  "Xi\u0027an",
+        "province":  "Shaanxi",
+        "ranking":  486,
+        "views":  32,
+        "scholarship":  false
+    },
+    {
+        "slug":  "university-of-south-china",
+        "name":  "University Of South China",
+        "code":  "UOSC",
+        "city":  "Hangzhou",
+        "province":  "Zhejiang",
+        "ranking":  494,
+        "views":  31,
+        "scholarship":  true
+    },
+    {
+        "slug":  "guizhou-university",
+        "name":  "Guizhou University",
+        "code":  "GU",
+        "city":  "Chengdu",
+        "province":  "Sichuan",
+        "ranking":  502,
+        "views":  30,
+        "scholarship":  true
+    },
+    {
+        "slug":  "jinggangshan-university",
+        "name":  "Jinggangshan University",
+        "code":  "JU",
+        "city":  "Guangzhou",
+        "province":  "Guangdong",
+        "ranking":  510,
+        "views":  29,
+        "scholarship":  false
+    },
+    {
+        "slug":  "shanghai-lixin-university-of-accounting-and-finance",
+        "name":  "Shanghai Lixin University Of Accounting And Finance",
+        "code":  "SLUOA",
+        "city":  "Qingdao",
+        "province":  "Shandong",
+        "ranking":  518,
+        "views":  28,
+        "scholarship":  true
+    },
+    {
+        "slug":  "shanghai-business-school",
+        "name":  "Shanghai Business School",
+        "code":  "SBS",
+        "city":  "Fuzhou",
+        "province":  "Fujian",
+        "ranking":  526,
+        "views":  27,
+        "scholarship":  true
+    },
+    {
+        "slug":  "changan-university",
+        "name":  "Changan University",
+        "code":  "CU",
+        "city":  "Changchun",
+        "province":  "Jilin",
+        "ranking":  534,
+        "views":  26,
+        "scholarship":  false
+    },
+    {
+        "slug":  "beijing-university-of-technology",
+        "name":  "Beijing University Of Technology",
+        "code":  "BUOT",
+        "city":  "Hefei",
+        "province":  "Anhui",
+        "ranking":  542,
+        "views":  25,
+        "scholarship":  true
+    },
+    {
+        "slug":  "nanjing-tech-university",
+        "name":  "Nanjing Tech University",
+        "code":  "NTU",
+        "city":  "Zhengzhou",
+        "province":  "Henan",
+        "ranking":  550,
+        "views":  24,
+        "scholarship":  true
+    },
+    {
+        "slug":  "shenyang-university-of-chemical-technology",
+        "name":  "Shenyang University Of Chemical Technology",
+        "code":  "SUOCT",
+        "city":  "Kunming",
+        "province":  "Yunnan",
+        "ranking":  558,
+        "views":  23,
+        "scholarship":  false
+    },
+    {
+        "slug":  "civil-aviation-university-of-china",
+        "name":  "Civil Aviation University Of China",
+        "code":  "CAUOC",
+        "city":  "Ningbo",
+        "province":  "Zhejiang",
+        "ranking":  553,
+        "views":  22,
+        "scholarship":  true
+    },
+    {
+        "slug":  "zhongnan-university-of-economics-and-law",
+        "name":  "Zhongnan University Of Economics And Law",
+        "code":  "ZUOEA",
+        "city":  "Xuzhou",
+        "province":  "Jiangsu",
+        "ranking":  561,
+        "views":  21,
+        "scholarship":  true
+    },
+    {
+        "slug":  "liaoning-communication-university",
+        "name":  "Liaoning Communication University",
+        "code":  "LCU",
+        "city":  "Beijing",
+        "province":  "Beijing",
+        "ranking":  569,
+        "views":  20,
+        "scholarship":  false
+    },
+    {
+        "slug":  "wenzhou-university",
+        "name":  "Wenzhou University",
+        "code":  "WU",
+        "city":  "Shanghai",
+        "province":  "Shanghai",
+        "ranking":  577,
+        "views":  19,
+        "scholarship":  true
+    },
+    {
+        "slug":  "northeast-forestry-university",
+        "name":  "Northeast Forestry University",
+        "code":  "NFU",
+        "city":  "Wuhan",
+        "province":  "Hubei",
+        "ranking":  585,
+        "views":  18,
+        "scholarship":  true
+    },
+    {
+        "slug":  "south-china-university-of-technology",
+        "name":  "South China University Of Technology",
+        "code":  "SCUOT",
+        "city":  "Nanjing",
+        "province":  "Jiangsu",
+        "ranking":  593,
+        "views":  17,
+        "scholarship":  false
+    },
+    {
+        "slug":  "ningxia-medical-university",
+        "name":  "Ningxia Medical University",
+        "code":  "NMU",
+        "city":  "Tianjin",
+        "province":  "Tianjin",
+        "ranking":  601,
+        "views":  16,
+        "scholarship":  true
+    },
+    {
+        "slug":  "central-south-university-of-forestry-and-technology",
+        "name":  "Central South University Of Forestry And Technology",
+        "code":  "CSUOF",
+        "city":  "Harbin",
+        "province":  "Heilongjiang",
+        "ranking":  609,
+        "views":  15,
+        "scholarship":  true
+    },
+    {
+        "slug":  "zaozhuang-university",
+        "name":  "Zaozhuang University",
+        "code":  "ZU",
+        "city":  "Dalian",
+        "province":  "Liaoning",
+        "ranking":  617,
+        "views":  14,
+        "scholarship":  false
+    },
+    {
+        "slug":  "zhejiang-wanli-university",
+        "name":  "Zhejiang Wanli University",
+        "code":  "ZWU",
+        "city":  "Shenzhen",
+        "province":  "Guangdong",
+        "ranking":  625,
+        "views":  13,
+        "scholarship":  true
+    },
+    {
+        "slug":  "lishui-university",
+        "name":  "Lishui University",
+        "code":  "LU",
+        "city":  "Xi\u0027an",
+        "province":  "Shaanxi",
+        "ranking":  633,
+        "views":  12,
+        "scholarship":  true
+    },
+    {
+        "slug":  "yangzhou-university",
+        "name":  "Yangzhou University",
+        "code":  "YU",
+        "city":  "Hangzhou",
+        "province":  "Zhejiang",
+        "ranking":  641,
+        "views":  11,
+        "scholarship":  false
+    },
+    {
+        "slug":  "shenzhen-university",
+        "name":  "Shenzhen University",
+        "code":  "SU",
+        "city":  "Chengdu",
+        "province":  "Sichuan",
+        "ranking":  649,
+        "views":  10,
+        "scholarship":  true
+    },
+    {
+        "slug":  "taizhou-university",
+        "name":  "Taizhou University",
+        "code":  "TU",
+        "city":  "Guangzhou",
+        "province":  "Guangdong",
+        "ranking":  644,
+        "views":  9,
+        "scholarship":  true
+    },
+    {
+        "slug":  "nanjing-university-of-aeronautics-and-astronautics",
+        "name":  "Nanjing University Of Aeronautics And Astronautics",
+        "code":  "NUOAA",
+        "city":  "Qingdao",
+        "province":  "Shandong",
+        "ranking":  652,
+        "views":  8,
+        "scholarship":  false
+    },
+    {
+        "slug":  "xuzhou-medical-university",
+        "name":  "Xuzhou Medical University",
+        "code":  "XMU",
+        "city":  "Fuzhou",
+        "province":  "Fujian",
+        "ranking":  660,
+        "views":  7,
+        "scholarship":  true
+    },
+    {
+        "slug":  "dalian-university-of-technology",
+        "name":  "Dalian University Of Technology",
+        "code":  "DUOT",
+        "city":  "Changchun",
+        "province":  "Jilin",
+        "ranking":  668,
+        "views":  6,
+        "scholarship":  true
+    },
+    {
+        "slug":  "shandong-agricultural-engineering-university",
+        "name":  "Shandong Agricultural Engineering University",
+        "code":  "SAEU",
+        "city":  "Hefei",
+        "province":  "Anhui",
+        "ranking":  676,
+        "views":  5,
+        "scholarship":  false
+    },
+    {
+        "slug":  "harbin-institute-of-technology",
+        "name":  "Harbin Institute Of Technology",
+        "code":  "HIOT",
+        "city":  "Zhengzhou",
+        "province":  "Henan",
+        "ranking":  684,
+        "views":  4,
+        "scholarship":  true
+    },
+    {
+        "slug":  "tianjin-university",
+        "name":  "Tianjin University",
+        "code":  "TU",
+        "city":  "Kunming",
+        "province":  "Yunnan",
+        "ranking":  692,
+        "views":  3,
+        "scholarship":  true
+    }
+]

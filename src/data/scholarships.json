@@ -1,0 +1,38 @@
+﻿[
+    {
+        "slug":  "university-scholarship",
+        "name":  "University Scholarship"
+    },
+    {
+        "slug":  "fully-funded-with-stipend",
+        "name":  "Fully Funded With Stipend"
+    },
+    {
+        "slug":  "provincial-government-scholarship",
+        "name":  "Provincial Government Scholarship"
+    },
+    {
+        "slug":  "chinese-government-scholarship-csc",
+        "name":  "Chinese Government Scholarship Csc"
+    },
+    {
+        "slug":  "half-tuition-50-scholarship",
+        "name":  "Half Tuition 50 Scholarship"
+    },
+    {
+        "slug":  "full-scholarship-tuition-stipend",
+        "name":  "Full Scholarship Tuition Stipend"
+    },
+    {
+        "slug":  "tuition-free-scholarship",
+        "name":  "Tuition Free Scholarship"
+    },
+    {
+        "slug":  "tuition-subsidy",
+        "name":  "Tuition Subsidy"
+    },
+    {
+        "slug":  "partial-scholarship",
+        "name":  "Partial Scholarship"
+    }
+]
