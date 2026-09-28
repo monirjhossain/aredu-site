@@ -12,7 +12,25 @@ export function mapScholarship(row) {
     desc: row.desc || '',
     content: row.content || '',
     image: row.image || null,
+    city: row.city || '',
+    programId: row.program_id || '',
+    degree: row.degree || '',
+    teachingLanguage: row.teaching_language || '',
+    intake: row.intake || '',
+    scholarshipType: row.scholarship_type || '',
+    deadline: row.deadline || '',
   }
+}
+
+export async function fetchEducationLevels() {
+  const data = await api.get('/education-levels')
+  const levels = data?.data?.levels || []
+  return levels.map((item) => (typeof item === 'string' ? item : item?.name || item?.label || '')).filter(Boolean)
+}
+
+export async function fetchScholarshipOptions() {
+  const data = await api.get('/scholarships/options')
+  return data?.data?.options || {}
 }
 
 export async function fetchScholarships({ search = '', perPage = 50, page = 1 } = {}) {

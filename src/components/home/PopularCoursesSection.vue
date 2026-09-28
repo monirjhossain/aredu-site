@@ -66,7 +66,7 @@ const total = computed(() => courses.value.length)
 </script>
 
 <template>
-  <section class="relative overflow-hidden pb-14 pt-8 sm:pb-16 sm:pt-10 lg:pb-20 lg:pt-12">
+  <section class="relative overflow-hidden pb-14 pt-28 sm:pb-16 sm:pt-32 lg:pb-20 lg:pt-36">
     <div class="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#E8F3F1]/70 to-transparent" />
 
     <div class="relative site-container">

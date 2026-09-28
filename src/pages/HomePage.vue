@@ -191,7 +191,7 @@ const howSteps = [
   </section>
 
   <!-- Impact strip — soft bar under hero -->
-  <section class="relative z-10 -mt-10 sm:-mt-12 lg:-mt-14">
+  <section class="relative z-30 -mt-16 -mb-16 sm:-mt-20 sm:-mb-20">
     <div class="site-container">
       <div class="overflow-hidden rounded-2xl bg-[#E8F3F1] px-5 py-7 shadow-soft ring-1 ring-jade/15 sm:px-8 sm:py-8 lg:rounded-3xl lg:px-10">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-0">

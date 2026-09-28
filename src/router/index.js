@@ -6,6 +6,7 @@ const router = createRouter({
     { path: '/', name: 'home', component: () => import('../pages/HomePage.vue') },
     { path: '/universities', name: 'universities', component: () => import('../pages/UniversitiesPage.vue') },
     { path: '/scholarships', name: 'scholarships', component: () => import('../pages/ScholarshipsPage.vue') },
+    { path: '/scholarships/:slug/apply', name: 'scholarship-apply', component: () => import('../pages/scholarship/ScholarshipApplyPage.vue') },
     { path: '/majors', name: 'majors', component: () => import('../pages/MajorsPage.vue') },
     { path: '/cities', name: 'cities', component: () => import('../pages/CitiesPage.vue') },
     { path: '/services', name: 'services', component: () => import('../pages/ServicesPage.vue') },
