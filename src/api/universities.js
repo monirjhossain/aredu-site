@@ -32,9 +32,19 @@ export function resolveMediaUrl(url) {
   const value = String(url).trim()
   if (!value) return null
   if (value.startsWith('data:')) return value
-  // Prefer /uploads/... so Vite proxy can serve admin files on :5173
+
+  const apiBase = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
   const uploadsIdx = value.indexOf('/uploads/')
-  if (uploadsIdx !== -1) return value.slice(uploadsIdx)
+  if (uploadsIdx !== -1) {
+    const path = value.slice(uploadsIdx)
+    // Local dev uses the Vite /uploads proxy. A live build must hit the Laravel host.
+    if (/^https?:\/\//i.test(apiBase)) {
+      const origin = apiBase.replace(/\/api$/i, '')
+      return `${origin}${path}`
+    }
+    return path
+  }
+
   if (/^https?:\/\//i.test(value)) return value
   return `/${value.replace(/^\//, '')}`
 }

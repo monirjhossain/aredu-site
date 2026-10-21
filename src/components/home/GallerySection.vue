@@ -1,29 +1,34 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { fetchSuccessPhotos } from '../../api/gallery.js'
 
-const slides = [
+const FALLBACK_SLIDES = [
   { id: 1, title: 'Visa approved smiles', place: 'Dhaka office', image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80' },
   { id: 2, title: 'Admission confirmation moment', place: 'Student desk', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80' },
   { id: 3, title: 'Scholarship guidance session', place: 'Counselling room', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80' },
   { id: 4, title: 'Parents consultation day', place: 'AR Education', image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80' },
-  { id: 5, title: 'University shortlist review', place: 'Planning board', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80' },
-  { id: 6, title: 'Offer letter handover', place: 'Success wall', image: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?auto=format&fit=crop&w=1200&q=80' },
-  { id: 7, title: 'Pre-departure briefing', place: 'Student meetup', image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1200&q=80' },
-  { id: 8, title: 'Airport send-off memory', place: 'Departure support', image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1200&q=80' },
-  { id: 9, title: 'China campus arrival', place: 'First day abroad', image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=1200&q=80' },
-  { id: 10, title: 'Student success celebration', place: 'Achievement board', image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80' },
 ]
 
+const slides = ref(FALLBACK_SLIDES.slice())
 const index = ref(0)
 const paused = ref(false)
 let timer = null
 
-const visibleSlides = computed(() =>
-  Array.from({ length: 4 }, (_, i) => slides[(index.value + i) % slides.length]),
-)
+const visibleSlides = computed(() => {
+  const list = slides.value
+  if (!list.length) return []
+  const count = Math.min(4, list.length)
+  return Array.from({ length: count }, (_, i) => list[(index.value + i) % list.length])
+})
+
+function photoNumber(slide) {
+  const found = slides.value.findIndex((item) => item.id === slide.id)
+  return found >= 0 ? found + 1 : ''
+}
 
 function go(step) {
-  index.value = (index.value + step + slides.length) % slides.length
+  const total = slides.value.length || 1
+  index.value = (index.value + step + total) % total
 }
 
 function start() {
@@ -38,7 +43,18 @@ function stop() {
   timer = null
 }
 
-onMounted(start)
+onMounted(async () => {
+  start()
+  try {
+    const rows = await fetchSuccessPhotos()
+    if (rows.length) {
+      slides.value = rows
+      index.value = 0
+    }
+  } catch (error) {
+    console.error(error)
+  }
+})
 onUnmounted(stop)
 </script>
 
@@ -95,11 +111,11 @@ onUnmounted(stop)
               <img :src="slide.image" :alt="slide.title" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
               <div class="absolute inset-0 bg-gradient-to-t from-[#08111d]/85 via-[#08111d]/20 to-transparent"></div>
               <div class="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-ink shadow-sm">
-                Photo {{ slide.id }}
+                Photo {{ photoNumber(slide) }}
               </div>
               <div class="absolute bottom-4 left-4 right-4">
                 <div class="font-display text-[1rem] font-extrabold leading-tight text-white">{{ slide.title }}</div>
-                <div class="mt-1 text-[11px] text-white/75">{{ slide.place }}</div>
+                <div v-if="slide.place" class="mt-1 text-[11px] text-white/75">{{ slide.place }}</div>
               </div>
             </div>
           </div>

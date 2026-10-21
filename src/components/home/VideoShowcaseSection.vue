@@ -1,7 +1,8 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { fetchGalleryVideos } from '../../api/videos.js'
 
-const videos = [
+const FALLBACK_VIDEOS = [
   { id: 'ysz5S6PUM-U', title: 'How to study in China from Bangladesh', tag: 'Student guide' },
   { id: 'ScMzIvxBSi4', title: 'Scholarship and admission roadmap', tag: 'Scholarship tips' },
   { id: 'aqz-KE-bpKQ', title: 'University life and student journey', tag: 'Campus story' },
@@ -10,16 +11,41 @@ const videos = [
   { id: '3fumBcKC6RE', title: 'What to expect before landing in China', tag: 'Pre-departure' },
 ]
 
+const videos = ref(FALLBACK_VIDEOS.slice())
 const index = ref(0)
 const activeVideo = ref(null)
 
-const visibleVideos = computed(() =>
-  Array.from({ length: 4 }, (_, i) => videos[(index.value + i) % videos.length]),
-)
+const visibleVideos = computed(() => {
+  const list = videos.value
+  if (!list.length) return []
+  const count = Math.min(4, list.length)
+  return Array.from({ length: count }, (_, i) => list[(index.value + i) % list.length])
+})
+
+function poster(id) {
+  return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+}
 
 function go(step) {
-  index.value = (index.value + step + videos.length) % videos.length
+  const total = videos.value.length || 1
+  index.value = (index.value + step + total) % total
 }
+
+function goTo(next) {
+  index.value = next
+}
+
+onMounted(async () => {
+  try {
+    const rows = await fetchGalleryVideos()
+    if (rows.length) {
+      videos.value = rows
+      index.value = 0
+    }
+  } catch (error) {
+    console.error(error)
+  }
+})
 
 function openVideo(video) {
   activeVideo.value = video
@@ -32,164 +58,218 @@ function closeVideo() {
 
 <template>
   <section class="site-container pb-14 sm:pb-16">
-    <div class="overflow-hidden rounded-[2rem] bg-[linear-gradient(145deg,#06101c,#0b172a_45%,#10233c_100%)] text-white ring-1 ring-white/10 lg:rounded-[2.5rem]">
-      <div class="flex flex-col gap-5 border-b border-white/10 px-6 py-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between lg:px-10">
-        <div class="max-w-2xl">
-          <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5">
+    <div class="reel-stage relative overflow-hidden rounded-[2rem] text-white ring-1 ring-white/10 lg:rounded-[2.75rem]">
+      <div class="pointer-events-none absolute -left-16 top-0 h-64 w-64 rounded-full bg-crimson/20 blur-3xl"></div>
+      <div class="pointer-events-none absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-jade/15 blur-3xl"></div>
+
+      <div class="relative flex flex-col gap-6 px-5 py-6 sm:px-8 sm:py-8 lg:flex-row lg:items-end lg:justify-between lg:px-10">
+        <div class="max-w-xl">
+          <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur">
             <i class="ti ti-brand-youtube text-[14px] text-crimson"></i>
-            <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/75">Video gallery</span>
+            <span class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">Video gallery</span>
           </div>
-          <h2 class="mt-4 font-display text-[1.8rem] font-extrabold leading-tight tracking-tight text-white sm:text-4xl">
+          <h2 class="mt-4 font-display text-[1.8rem] font-extrabold leading-tight tracking-tight sm:text-4xl">
             Watch student guidance videos
           </h2>
-          <p class="mt-3 text-[14.5px] leading-relaxed text-white/58">
-            Vertical video previews keep playing on screen. Click any reel card to open the full video in a popup player.
-          </p>
         </div>
 
-        <div class="flex items-center gap-3">
-          <button
-            type="button"
-            class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white"
-            aria-label="Previous videos"
-            @click="go(-1)"
-          >
+        <div class="flex items-center gap-2">
+          <button type="button" class="reel-nav" aria-label="Previous videos" @click="go(-1)">
             <i class="ti ti-chevron-left text-[18px]"></i>
           </button>
-          <button
-            type="button"
-            class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white"
-            aria-label="Next videos"
-            @click="go(1)"
-          >
+          <button type="button" class="reel-nav" aria-label="Next videos" @click="go(1)">
             <i class="ti ti-chevron-right text-[18px]"></i>
           </button>
         </div>
       </div>
 
-      <div class="relative p-4 sm:p-5 lg:p-6">
-        <div class="pointer-events-none absolute left-1/2 top-10 h-56 w-56 -translate-x-1/2 rounded-full bg-crimson/15 blur-3xl"></div>
-        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div class="text-[12px] text-white/45">Showing 4 vertical videos, sliding one by one</div>
-          <div class="text-[12px] font-semibold text-crimson">{{ index + 1 }} / {{ videos.length }}</div>
-        </div>
-
-        <div class="relative flex gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-[1.18fr_0.94fr_0.94fr_0.94fr] lg:overflow-visible lg:pb-0">
+      <div class="relative px-4 pb-7 sm:px-6 lg:px-8 lg:pb-9">
+        <div class="flex items-end gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-[1.25fr_0.85fr_0.85fr_0.85fr] lg:items-stretch lg:gap-4 lg:overflow-visible lg:pb-0">
           <button
+            v-if="visibleVideos[0]"
             type="button"
-            class="group min-w-[82vw] shrink-0 overflow-hidden rounded-[2.2rem] bg-white/8 p-2.5 text-left ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(225,29,46,0.18)] sm:min-w-[360px] lg:min-w-0"
+            class="reel-card reel-card-feature min-w-[78vw] sm:min-w-[340px] lg:min-w-0"
             @click="openVideo(visibleVideos[0])"
           >
-            <div class="relative aspect-[4/5] overflow-hidden rounded-[1.8rem] border border-white/10 bg-[#08111d] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]">
-              <div class="pointer-events-none absolute inset-x-0 top-0 z-10 h-24 bg-gradient-to-b from-black/35 to-transparent"></div>
-              <div class="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
-                <div class="mx-auto h-1.5 w-16 rounded-full bg-white/20"></div>
-                <div class="h-2.5 w-2.5 rounded-full bg-white/40"></div>
-              </div>
-              <div class="absolute left-1/2 top-3 z-10 h-4 w-24 -translate-x-1/2 rounded-full bg-black/35 blur-sm"></div>
+            <span class="reel-bezel aspect-[4/5]">
               <iframe
-                class="absolute inset-0 h-full w-full scale-[1.18] origin-center"
+                class="pointer-events-none absolute inset-0 h-full w-full scale-[1.22] origin-center"
                 :src="`https://www.youtube.com/embed/${visibleVideos[0].id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${visibleVideos[0].id}&playsinline=1&modestbranding=1&rel=0`"
-                :title="visibleVideos[0].title"
+                title="Video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               ></iframe>
-              <div class="absolute inset-0 bg-gradient-to-t from-[#08111d]/90 via-[#08111d]/20 to-transparent"></div>
-              <div class="absolute left-5 top-14 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-ink shadow-sm">
-                Featured reel
-              </div>
-              <div class="absolute right-5 top-14 flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur">
+              <span class="reel-glass"></span>
+              <span class="reel-play">
                 <i class="ti ti-player-play-filled ml-0.5 text-[18px]"></i>
-              </div>
-              <div class="absolute inset-x-5 bottom-5">
-                <div class="rounded-[1.4rem] border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
-                  <div class="inline-flex rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/85">
-                    {{ visibleVideos[0].tag }}
-                  </div>
-                  <div class="mt-3 font-display text-[1.2rem] font-extrabold leading-snug text-white sm:text-[1.35rem]">
-                    {{ visibleVideos[0].title }}
-                  </div>
-                  <div class="mt-3 inline-flex items-center gap-2 text-[11px] font-semibold text-white/80">
-                    Watch in popup
-                    <i class="ti ti-arrow-up-right"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
+              </span>
+            </span>
           </button>
 
           <button
             v-for="(video, sideIndex) in visibleVideos.slice(1)"
-            :key="`${video.id}-${index}`"
+            :key="`${video.id}-${index}-${sideIndex}`"
             type="button"
-            class="group min-w-[66vw] shrink-0 overflow-hidden rounded-[1.7rem] bg-white/8 p-2 text-left ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(15,118,110,0.14)] sm:min-w-[250px] lg:min-w-0"
-            :class="
-              sideIndex === 0
-                ? 'lg:-rotate-1'
-                : sideIndex === 1
-                  ? 'lg:translate-y-3'
-                  : 'lg:rotate-1'
-            "
+            class="reel-card min-w-[58vw] sm:min-w-[220px] lg:min-w-0"
+            :style="{ transitionDelay: `${sideIndex * 40}ms` }"
             @click="openVideo(video)"
           >
-            <div class="relative overflow-hidden rounded-[1.45rem] border border-white/10 bg-[#08111d] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] aspect-[4/5]">
-              <div class="pointer-events-none absolute inset-x-0 top-0 z-10 h-20 bg-gradient-to-b from-black/30 to-transparent"></div>
-              <div class="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
-                <div class="mx-auto h-1.5 w-12 rounded-full bg-white/20"></div>
-                <div class="h-2.5 w-2.5 rounded-full bg-white/40"></div>
-              </div>
-              <iframe
-                class="absolute inset-0 h-full w-full scale-[1.18] origin-center"
-                :src="`https://www.youtube.com/embed/${video.id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${video.id}&playsinline=1&modestbranding=1&rel=0`"
-                :title="video.title"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              ></iframe>
-              <div class="absolute inset-0 bg-gradient-to-t from-[#08111d]/88 via-transparent to-[#08111d]/10"></div>
-              <div class="absolute left-4 top-12 rounded-full bg-white/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-ink shadow-sm">
-                {{ video.tag }}
-              </div>
-              <div class="absolute inset-x-4 bottom-4">
-                <div class="rounded-[1.2rem] border border-white/10 bg-white/10 p-3 backdrop-blur-xl">
-                  <div class="font-display text-[0.95rem] font-extrabold leading-snug text-white">
-                    {{ video.title }}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <span class="reel-bezel aspect-[4/5]">
+              <img
+                :src="poster(video.id)"
+                alt=""
+                class="absolute inset-0 h-full w-full scale-110 object-cover transition duration-700 group-hover:scale-125"
+              />
+              <span class="reel-shade"></span>
+              <span class="reel-play reel-play-sm">
+                <i class="ti ti-player-play-filled ml-0.5 text-[16px]"></i>
+              </span>
+            </span>
           </button>
+        </div>
+
+        <div v-if="videos.length > 1" class="mt-5 flex items-center justify-center gap-1.5">
+          <button
+            v-for="(_, dot) in videos"
+            :key="dot"
+            type="button"
+            class="h-1.5 rounded-full transition-all duration-300"
+            :class="dot === index ? 'w-7 bg-white' : 'w-1.5 bg-white/30 hover:bg-white/55'"
+            :aria-label="`Show video ${dot + 1}`"
+            @click="goTo(dot)"
+          ></button>
         </div>
       </div>
     </div>
 
     <div
       v-if="activeVideo"
-      class="fixed inset-0 z-[80] flex items-center justify-center bg-[#08111d]/80 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-[80] flex items-center justify-center bg-[#05080e]/80 p-4 backdrop-blur-md"
       @click.self="closeVideo"
     >
-      <div class="w-full max-w-md overflow-hidden rounded-[1.75rem] bg-black shadow-2xl sm:max-w-3xl">
-        <div class="flex items-center justify-between bg-white px-4 py-4 sm:px-5">
-          <div class="min-w-0">
-            <div class="truncate font-display text-lg font-extrabold text-ink">{{ activeVideo.title }}</div>
-            <div class="text-[12px] text-ink/45">{{ activeVideo.tag }}</div>
-          </div>
+      <div class="relative w-full max-w-[380px]">
+        <div class="pointer-events-none absolute -inset-8 rounded-full bg-crimson/20 blur-3xl"></div>
+        <div class="relative overflow-hidden rounded-[1.8rem] bg-black shadow-[0_40px_120px_rgba(0,0,0,0.55)] ring-1 ring-white/15">
           <button
             type="button"
-            class="flex h-10 w-10 items-center justify-center rounded-full bg-[#F7F8FA] text-ink/60 hover:text-ink"
+            class="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white ring-1 ring-white/20 backdrop-blur hover:bg-black/80"
             aria-label="Close video"
             @click="closeVideo"
           >
             <i class="ti ti-x text-[20px]"></i>
           </button>
-        </div>
-        <div class="aspect-[9/16] bg-black sm:aspect-[16/10]">
-          <iframe
-            class="h-full w-full"
-            :src="`https://www.youtube.com/embed/${activeVideo.id}?autoplay=1&rel=0`"
-            :title="activeVideo.title"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-          ></iframe>
+          <div class="aspect-[9/16] bg-black">
+            <iframe
+              class="h-full w-full"
+              :src="`https://www.youtube.com/embed/${activeVideo.id}?autoplay=1&rel=0`"
+              title="Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
         </div>
       </div>
     </div>
   </section>
 </template>
+
+<style scoped>
+.reel-stage {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -10%, rgba(225, 29, 46, 0.16), transparent 55%),
+    linear-gradient(180deg, #080d16 0%, #10192a 55%, #0b1220 100%);
+}
+
+.reel-nav {
+  display: flex;
+  height: 2.6rem;
+  width: 2.6rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.reel-nav:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.reel-card {
+  display: block;
+  text-align: left;
+  transition: transform 0.45s ease;
+}
+
+.reel-card:hover {
+  transform: translateY(-6px);
+}
+
+.reel-card-feature:hover {
+  transform: translateY(-8px);
+}
+
+.reel-bezel {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 1.7rem;
+  background: #070b12;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.38),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.reel-glass {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 28%, transparent 70%, rgba(0, 0, 0, 0.28));
+}
+
+.reel-shade {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 13, 22, 0.05), rgba(8, 13, 22, 0.18));
+  transition: background 0.3s ease;
+}
+
+.reel-card:hover .reel-shade {
+  background: linear-gradient(180deg, rgba(8, 13, 22, 0.02), rgba(8, 13, 22, 0.28));
+}
+
+.reel-play {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  height: 3.4rem;
+  width: 3.4rem;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: white;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.reel-play-sm {
+  opacity: 1;
+  height: 3rem;
+  width: 3rem;
+}
+
+.reel-card:hover .reel-play {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+</style>

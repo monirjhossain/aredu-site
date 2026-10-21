@@ -3,8 +3,8 @@ export const PHONE = '+8801756502004'
 export const EMAIL = 'info@areducation.net'
 export const ADDRESS =
   '10th floor, Tropical Tower, Bata Signal, Elephant Road, Dhaka, Bangladesh'
-export const FACEBOOK = 'https://www.facebook.com/chinaedubangladesh'
-export const YOUTUBE = 'https://www.youtube.com/@chinaedubangladesh'
+export const FACEBOOK = 'https://www.facebook.com/AREducationbd'
+export const YOUTUBE = 'https://www.youtube.com/@areducationbd'
 
 export const BRAND = 'AR Education'
 

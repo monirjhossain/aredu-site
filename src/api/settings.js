@@ -6,8 +6,8 @@ const FALLBACK = {
   whatsapp: 'https://wa.me/8801756502004',
   email: 'info@areducation.net',
   address: '10th floor, Tropical Tower, Bata Signal, Elephant Road, Dhaka, Bangladesh',
-  facebook: 'https://www.facebook.com/chinaedubangladesh',
-  youtube: 'https://www.youtube.com/@chinaedubangladesh',
+  facebook: 'https://www.facebook.com/AREducationbd',
+  youtube: 'https://www.youtube.com/@areducationbd',
   faqs: [],
 }
 
