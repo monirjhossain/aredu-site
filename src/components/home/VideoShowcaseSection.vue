@@ -1,6 +1,6 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { fetchGalleryVideos } from '../../api/videos.js'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 
 const FALLBACK_VIDEOS = [
   { id: 'ysz5S6PUM-U', title: 'How to study in China from Bangladesh', tag: 'Student guide' },
@@ -35,17 +35,19 @@ function goTo(next) {
   index.value = next
 }
 
-onMounted(async () => {
-  try {
-    const rows = await fetchGalleryVideos()
-    if (rows.length) {
-      videos.value = rows
-      index.value = 0
-    }
-  } catch (error) {
-    console.error(error)
-  }
+const { videos: homeVideos } = useHomeBootstrap()
+
+function applyVideos(rows) {
+  if (!rows?.length) return
+  videos.value = rows
+  index.value = 0
+}
+
+onMounted(() => {
+  applyVideos(homeVideos.value)
 })
+
+watch(homeVideos, applyVideos)
 
 function openVideo(video) {
   activeVideo.value = video

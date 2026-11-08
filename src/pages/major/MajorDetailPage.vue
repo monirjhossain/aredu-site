@@ -1,8 +1,10 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useSiteSettings } from '../../composables/useSiteSettings.js'
-import { fetchMajorBySlug } from '../../api/majors.js'
+import { fetchMajorBySlug, mapSubject } from '../../api/majors.js'
+import { mapPostToUniversity } from '../../api/universities.js'
+import { buildApiPath, peekApi, subscribeApi } from '../../api/client.js'
 import UniversityCard from '../../components/ui/UniversityCard.vue'
 
 const { whatsapp: WHATSAPP } = useSiteSettings()
@@ -11,20 +13,39 @@ const loading = ref(true)
 const error = ref('')
 const major = ref(null)
 const relatedUnis = ref([])
+let unsub = null
+
+function applyPayload(payload) {
+  if (!payload?.data) return
+  if (payload.data.subject) major.value = mapSubject(payload.data.subject)
+  if (Array.isArray(payload.data.universities)) {
+    relatedUnis.value = payload.data.universities.map((row, i) => mapPostToUniversity(row, i)).filter(Boolean)
+  }
+}
 
 async function load() {
-  loading.value = true
+  const slug = route.params.slug
+  const path = buildApiPath(`/majors/${encodeURIComponent(slug)}`)
   error.value = ''
-  major.value = null
-  relatedUnis.value = []
+  if (unsub) unsub()
+  unsub = subscribeApi(path, applyPayload)
+
+  const cached = peekApi(path)
+  if (cached?.data?.subject) {
+    applyPayload(cached)
+    loading.value = false
+  } else {
+    loading.value = true
+  }
+
   try {
-    const result = await fetchMajorBySlug(route.params.slug)
+    const result = await fetchMajorBySlug(slug)
     major.value = result.major
     relatedUnis.value = result.universities
-    if (!result.major) error.value = 'Major not found'
+    if (!result.major && !major.value) error.value = 'Major not found'
   } catch (e) {
     console.error(e)
-    error.value = e.message || 'Could not load major'
+    if (!major.value) error.value = e.message || 'Could not load major'
   } finally {
     loading.value = false
   }
@@ -32,18 +53,21 @@ async function load() {
 
 onMounted(load)
 watch(() => route.params.slug, load)
+onUnmounted(() => {
+  if (unsub) unsub()
+})
 </script>
 
 <template>
   <div class="site-container py-10">
-    <div v-if="loading" class="space-y-4">
+    <div v-if="loading && !major" class="space-y-4">
       <div class="h-40 animate-pulse rounded-2xl bg-gray-100" />
       <div class="grid gap-4 sm:grid-cols-3">
         <div v-for="n in 3" :key="n" class="h-40 animate-pulse rounded-2xl bg-gray-100" />
       </div>
     </div>
 
-    <div v-else-if="error || !major" class="rounded-2xl border border-gray-200 bg-white p-8 text-center">
+    <div v-else-if="(error || !major) && !loading" class="rounded-2xl border border-gray-200 bg-white p-8 text-center">
       <h1 class="text-xl font-extrabold text-[var(--color-secondary)]">Major not found</h1>
       <p class="mt-2 text-[14px] text-gray-500">{{ error || 'This major is not available yet.' }}</p>
       <RouterLink to="/majors" class="mt-4 inline-block text-[13px] font-semibold text-[var(--color-primary)]">Back to majors</RouterLink>

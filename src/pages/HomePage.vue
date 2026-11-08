@@ -1,12 +1,11 @@
 <script setup>
-import { defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
+import { defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { TOOLS, DEGREES, FIELD_GROUPS, SERVICES, SCHOLARSHIP_META } from '../data/site.js'
 import scholarshipsJson from '../data/scholarships.json'
 import { HOME_CITIES } from '../data/homeFallbacks.js'
-import { fetchCities } from '../api/cities.js'
-import { fetchScholarships } from '../api/scholarships.js'
 import { useSiteSettings } from '../composables/useSiteSettings.js'
+import { useHomeBootstrap } from '../composables/useHomeBootstrap.js'
 import FaqItem from '../components/ui/FaqItem.vue'
 import StatCounter from '../components/ui/StatCounter.vue'
 import HeroUniSlider from '../components/home/HeroUniSlider.vue'
@@ -18,6 +17,7 @@ const GallerySection = defineAsyncComponent(() => import('../components/home/Gal
 const VideoShowcaseSection = defineAsyncComponent(() => import('../components/home/VideoShowcaseSection.vue'))
 
 const { brand, whatsapp, faqs } = useSiteSettings()
+const { cities: homeCities, scholarships: homeScholarships, services: homeServices } = useHomeBootstrap()
 const router = useRouter()
 const searchQuery = ref('')
 
@@ -45,31 +45,30 @@ const scholarships = ref(
 )
 const services = ref([...SERVICES])
 
+function applyHomeLists() {
+  if (homeCities.value?.length) {
+    featuredCities.value = homeCities.value
+      .map((c) => ({ ...c, uniCount: c.uniCount || c.universities || 1 }))
+      .sort((a, b) => b.uniCount - a.uniCount)
+      .slice(0, 5)
+  }
+  if (homeScholarships.value?.length) {
+    scholarships.value = homeScholarships.value
+  }
+  if (homeServices.value?.length) {
+    services.value = homeServices.value
+  }
+}
+
 onMounted(() => {
   heroBgTimer = setInterval(() => {
     heroBgIndex.value = (heroBgIndex.value + 1) % HERO_BG_SLIDES.length
   }, 5000)
 
-  // Silent upgrade only — UI already full
-  Promise.allSettled([
-    fetchCities({ perPage: 8 }),
-    fetchScholarships({ perPage: 6 }),
-    import('../api/services.js').then((m) => m.fetchServices({ perPage: 6 })),
-  ]).then(([citiesRes, schRes, svcRes]) => {
-    if (citiesRes.status === 'fulfilled' && citiesRes.value.items?.length) {
-      featuredCities.value = citiesRes.value.items
-        .map((c) => ({ ...c, uniCount: c.uniCount || c.universities || 1 }))
-        .sort((a, b) => b.uniCount - a.uniCount)
-        .slice(0, 5)
-    }
-    if (schRes.status === 'fulfilled' && schRes.value.items?.length) {
-      scholarships.value = schRes.value.items
-    }
-    if (svcRes.status === 'fulfilled' && svcRes.value.items?.length) {
-      services.value = svcRes.value.items
-    }
-  })
+  applyHomeLists()
 })
+
+watch([homeCities, homeScholarships, homeServices], applyHomeLists)
 
 onUnmounted(() => {
   if (heroBgTimer) clearInterval(heroBgTimer)

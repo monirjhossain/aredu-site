@@ -1,8 +1,10 @@
-<script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+﻿<script setup>
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useSiteSettings } from '../../composables/useSiteSettings.js'
-import { fetchScholarshipBySlug } from '../../api/scholarships.js'
+import { fetchScholarshipBySlug, mapScholarship } from '../../api/scholarships.js'
+import { mapPostToUniversity } from '../../api/universities.js'
+import { buildApiPath, peekApi, subscribeApi } from '../../api/client.js'
 import UniversityCard from '../../components/ui/UniversityCard.vue'
 
 const { whatsapp: WHATSAPP } = useSiteSettings()
@@ -11,20 +13,39 @@ const loading = ref(true)
 const error = ref('')
 const scholarship = ref(null)
 const relatedUnis = ref([])
+let unsub = null
+
+function applyPayload(payload) {
+  if (!payload?.data) return
+  if (payload.data.scholarship) scholarship.value = mapScholarship(payload.data.scholarship)
+  if (Array.isArray(payload.data.universities)) {
+    relatedUnis.value = payload.data.universities.map((row, i) => mapPostToUniversity(row, i)).filter(Boolean)
+  }
+}
 
 async function load() {
-  loading.value = true
+  const slug = route.params.slug
+  const path = buildApiPath(`/scholarships/${encodeURIComponent(slug)}`)
   error.value = ''
-  scholarship.value = null
-  relatedUnis.value = []
+  if (unsub) unsub()
+  unsub = subscribeApi(path, applyPayload)
+
+  const cached = peekApi(path)
+  if (cached?.data?.scholarship) {
+    applyPayload(cached)
+    loading.value = false
+  } else {
+    loading.value = true
+  }
+
   try {
-    const result = await fetchScholarshipBySlug(route.params.slug)
+    const result = await fetchScholarshipBySlug(slug)
     scholarship.value = result.scholarship
     relatedUnis.value = result.universities
-    if (!result.scholarship) error.value = 'Scholarship not found'
+    if (!result.scholarship && !scholarship.value) error.value = 'Scholarship not found'
   } catch (e) {
     console.error(e)
-    error.value = e.message || 'Could not load scholarship'
+    if (!scholarship.value) error.value = e.message || 'Could not load scholarship'
   } finally {
     loading.value = false
   }
@@ -32,6 +53,9 @@ async function load() {
 
 onMounted(load)
 watch(() => route.params.slug, load)
+onUnmounted(() => {
+  if (unsub) unsub()
+})
 
 const highlights = computed(() => {
   if (!scholarship.value) return []
@@ -56,11 +80,11 @@ const includes = computed(() => {
 
 <template>
   <div>
-    <div v-if="loading" class="site-container py-10">
+    <div v-if="loading && !scholarship" class="site-container py-10">
       <div class="h-56 animate-pulse rounded-2xl bg-gray-100" />
     </div>
 
-    <div v-else-if="error || !scholarship" class="site-container py-10">
+    <div v-else-if="(error || !scholarship) && !loading" class="site-container py-10">
       <div class="rounded-2xl border border-gray-200 bg-white p-8 text-center">
         <h1 class="text-xl font-extrabold text-[var(--color-secondary)]">Scholarship not found</h1>
         <p class="mt-2 text-[14px] text-gray-500">{{ error }}</p>

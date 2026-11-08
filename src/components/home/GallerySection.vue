@@ -1,6 +1,6 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { fetchSuccessPhotos } from '../../api/gallery.js'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 
 const FALLBACK_SLIDES = [
   { id: 1, title: 'Visa approved smiles', place: 'Dhaka office', image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80' },
@@ -43,18 +43,20 @@ function stop() {
   timer = null
 }
 
-onMounted(async () => {
+const { successPhotos } = useHomeBootstrap()
+
+function applyPhotos(rows) {
+  if (!rows?.length) return
+  slides.value = rows
+  index.value = 0
+}
+
+onMounted(() => {
   start()
-  try {
-    const rows = await fetchSuccessPhotos()
-    if (rows.length) {
-      slides.value = rows
-      index.value = 0
-    }
-  } catch (error) {
-    console.error(error)
-  }
+  applyPhotos(successPhotos.value)
 })
+
+watch(successPhotos, applyPhotos)
 onUnmounted(stop)
 </script>
 

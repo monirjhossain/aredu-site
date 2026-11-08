@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import { prefetchUniversity } from '../../api/prefetch.js'
 
 defineProps({
   university: { type: Object, required: true },
@@ -10,6 +11,8 @@ defineProps({
   <RouterLink
     :to="`/university/${university.slug}`"
     class="group relative block overflow-hidden rounded-[1.35rem] bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)] ring-1 ring-ink/8 transition duration-300 hover:-translate-y-1.5 hover:shadow-lift hover:ring-crimson/25"
+    @mouseenter="prefetchUniversity(university.slug)"
+    @focus="prefetchUniversity(university.slug)"
   >
     <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[45%] bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(247,248,250,0.9))]"></div>
     <div class="relative h-44 overflow-hidden bg-ink sm:h-48">

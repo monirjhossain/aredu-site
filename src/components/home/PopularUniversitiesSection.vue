@@ -1,10 +1,11 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { HOME_UNIVERSITIES } from '../../data/homeFallbacks.js'
-import { fetchUniversities } from '../../api/universities.js'
+import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 import UniversityCard from '../ui/UniversityCard.vue'
 
+const { universities } = useHomeBootstrap()
 const featured = ref([...HOME_UNIVERSITIES])
 const currentIndex = ref(0)
 const paused = ref(false)
@@ -42,42 +43,24 @@ function stopSlider() {
   timer = null
 }
 
-async function loadFeatured() {
-  try {
-    const result = await fetchUniversities({ perPage: 12 })
-    if (result.items?.length) {
-      featured.value = result.items.slice(0, 10)
-      currentIndex.value = 0
-      startSlider()
-    }
-  } catch (e) {
-    // keep fallbacks
-  }
-}
-
-function onVisible(entries, observer) {
-  if (entries.some((e) => e.isIntersecting)) {
-    observer.disconnect()
-    loadFeatured()
-  }
+function applyUniversities(list) {
+  if (!list?.length) return
+  featured.value = list.slice(0, 10)
+  currentIndex.value = 0
+  startSlider()
 }
 
 const sectionEl = ref(null)
-let visibilityObserver = null
 
 onMounted(() => {
   startSlider()
-  if (!('IntersectionObserver' in window)) {
-    loadFeatured()
-    return
-  }
-  visibilityObserver = new IntersectionObserver(onVisible, { rootMargin: '240px' })
-  if (sectionEl.value) visibilityObserver.observe(sectionEl.value)
+  applyUniversities(universities.value)
 })
+
+watch(universities, applyUniversities)
 
 onUnmounted(() => {
   stopSlider()
-  if (visibilityObserver) visibilityObserver.disconnect()
 })
 </script>
 

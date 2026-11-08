@@ -2,7 +2,8 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useSiteSettings } from '../../composables/useSiteSettings.js'
-import { fetchUniversities, fetchUniversityBySlug } from '../../api/universities.js'
+import { fetchUniversities, fetchUniversityBySlug, mapPostToUniversity } from '../../api/universities.js'
+import { buildApiPath, peekApi, subscribeApi } from '../../api/client.js'
 import UniversityCard from '../../components/ui/UniversityCard.vue'
 
 const { whatsapp: WHATSAPP } = useSiteSettings()
@@ -14,6 +15,7 @@ const error = ref('')
 const uni = ref(null)
 const allUniversities = ref([])
 let sliderTimer = null
+let unsubDetail = null
 
 const sliderUniversities = computed(() => {
   if (!uni.value) return allUniversities.value.slice(0, 8)
@@ -100,11 +102,26 @@ function stopSlider() {
 }
 
 async function load() {
-  loading.value = true
+  const slug = route.params.slug
+  const detailPath = buildApiPath(`/posts/${encodeURIComponent(slug)}`)
   error.value = ''
+
+  if (unsubDetail) unsubDetail()
+  unsubDetail = subscribeApi(detailPath, (payload) => {
+    if (payload?.data?.post) uni.value = mapPostToUniversity(payload.data.post)
+  })
+
+  const cached = peekApi(detailPath)
+  if (cached?.data?.post) {
+    uni.value = mapPostToUniversity(cached.data.post)
+    loading.value = false
+  } else {
+    loading.value = true
+  }
+
   try {
     const [detail, list] = await Promise.all([
-      fetchUniversityBySlug(route.params.slug),
+      fetchUniversityBySlug(slug),
       fetchUniversities({ perPage: 40 }),
     ])
     uni.value = detail
@@ -113,8 +130,10 @@ async function load() {
     startSlider()
   } catch (e) {
     console.error(e)
-    error.value = e.message || 'Failed to load university'
-    uni.value = null
+    if (!uni.value) {
+      error.value = e.message || 'Failed to load university'
+      uni.value = null
+    }
   } finally {
     loading.value = false
   }
@@ -131,11 +150,12 @@ onMounted(load)
 
 onUnmounted(() => {
   stopSlider()
+  if (unsubDetail) unsubDetail()
 })
 </script>
 
 <template>
-  <div v-if="loading" class="site-container py-20 text-center text-[14px] text-ink/45">
+  <div v-if="loading && !uni" class="site-container py-20 text-center text-[14px] text-ink/45">
     Loading university from admin...
   </div>
 

@@ -10,14 +10,17 @@ const state = reactive({
 
 let loadPromise = null
 
+export function applySiteSettings(data) {
+  if (!data || typeof data !== 'object') return state
+  Object.assign(state, data, { loaded: true })
+  return state
+}
+
 export async function loadSiteSettings() {
   if (state.loaded) return state
   if (loadPromise) return loadPromise
   loadPromise = fetchSiteSettings()
-    .then((data) => {
-      Object.assign(state, data, { loaded: true })
-      return state
-    })
+    .then((data) => applySiteSettings(data))
     .finally(() => {
       loadPromise = null
     })

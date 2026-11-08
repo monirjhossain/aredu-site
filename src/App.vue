@@ -2,10 +2,13 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { loadSiteSettings, provideSiteSettings, useSiteSettings } from './composables/useSiteSettings.js'
+import { loadHomeBootstrap, provideHomeBootstrap } from './composables/useHomeBootstrap.js'
+import { prefetchCatalogs } from './api/prefetch.js'
 import AppHeader from './components/layout/AppHeader.vue'
 import AppFooter from './components/layout/AppFooter.vue'
 
 provideSiteSettings()
+provideHomeBootstrap()
 const { whatsapp } = useSiteSettings()
 
 const route = useRoute()
@@ -27,7 +30,14 @@ watch(
 )
 
 onMounted(() => {
-  loadSiteSettings()
+  // One cached home call feeds the homepage; settings come with it.
+  // If home fails, fall back to settings-only.
+  loadHomeBootstrap()
+    .then(() => prefetchCatalogs())
+    .catch(() => {
+      loadSiteSettings()
+      prefetchCatalogs()
+    })
   window.addEventListener('scroll', onScroll, { passive: true })
   onScroll()
 })

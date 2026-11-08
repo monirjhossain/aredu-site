@@ -1,7 +1,8 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchUniversities } from '../api/universities.js'
+import { fetchUniversities, mapPostToUniversity } from '../api/universities.js'
+import { buildApiPath, peekApi } from '../api/client.js'
 import UniversityCard from '../components/ui/UniversityCard.vue'
 import NeedHelpBanner from '../components/ui/NeedHelpBanner.vue'
 
@@ -28,8 +29,22 @@ watch(
 )
 
 async function loadUniversities() {
-  loading.value = true
   error.value = ''
+  const params = {
+    post_type: 'university',
+    per_page: 100,
+    page: 1,
+    search: searchQuery.value.trim() || undefined,
+  }
+  const cached = peekApi(buildApiPath('/posts', params))
+  if (cached?.data?.posts?.data?.length) {
+    universities.value = cached.data.posts.data.map((row, i) => mapPostToUniversity(row, i)).filter(Boolean)
+    totalFromApi.value = cached.data.posts.total ?? universities.value.length
+    loading.value = false
+  } else {
+    loading.value = true
+  }
+
   try {
     const result = await fetchUniversities({
       search: searchQuery.value.trim(),
@@ -39,8 +54,10 @@ async function loadUniversities() {
     totalFromApi.value = result.total
   } catch (e) {
     console.error(e)
-    error.value = e.message || 'Could not load universities from admin API'
-    universities.value = []
+    if (!universities.value.length) {
+      error.value = e.message || 'Could not load universities from admin API'
+      universities.value = []
+    }
   } finally {
     loading.value = false
   }

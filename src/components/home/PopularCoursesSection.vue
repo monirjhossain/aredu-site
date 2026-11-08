@@ -1,7 +1,7 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { fetchMajors } from '../../api/majors.js'
+import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 import { POPULAR_COURSES } from '../../data/popularCourses'
 
 const PALETTE = [
@@ -33,19 +33,20 @@ function decorate(row, i) {
   }
 }
 
-onMounted(async () => {
-  loading.value = true
-  try {
-    const result = await fetchMajors({ perPage: 60 })
-    const items = (result.items || []).map(decorate)
-    courses.value = items.length ? items : POPULAR_COURSES.map((c, i) => decorate(c, i))
-  } catch (e) {
-    console.error(e)
-    courses.value = POPULAR_COURSES.map((c, i) => decorate(c, i))
-  } finally {
-    loading.value = false
-  }
+const { majors } = useHomeBootstrap()
+
+function applyMajors(list) {
+  const items = (list || []).map(decorate)
+  courses.value = items.length ? items : POPULAR_COURSES.map((c, i) => decorate(c, i))
+  loading.value = false
+}
+
+onMounted(() => {
+  loading.value = !majors.value?.length
+  applyMajors(majors.value)
 })
+
+watch(majors, applyMajors)
 
 const filters = computed(() => {
   const fields = [...new Set(courses.value.map((c) => c.field).filter(Boolean))]

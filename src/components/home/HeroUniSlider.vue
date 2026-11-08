@@ -1,9 +1,10 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { HOME_UNIVERSITIES } from '../../data/homeFallbacks.js'
-import { fetchUniversities } from '../../api/universities.js'
+import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 
+const { universities } = useHomeBootstrap()
 const slides = ref([...HOME_UNIVERSITIES])
 const index = ref(0)
 const paused = ref(false)
@@ -29,17 +30,19 @@ function stop() {
   timer = null
 }
 
+function applyUniversities(list) {
+  if (!list?.length) return
+  slides.value = list.slice(0, 8)
+  index.value = 0
+  start()
+}
+
 onMounted(() => {
   start()
-  fetchUniversities({ perPage: 8 })
-    .then((result) => {
-      if (result.items?.length) {
-        slides.value = result.items.slice(0, 8)
-        index.value = 0
-      }
-    })
-    .catch(() => {})
+  applyUniversities(universities.value)
 })
+
+watch(universities, applyUniversities)
 
 onUnmounted(stop)
 </script>

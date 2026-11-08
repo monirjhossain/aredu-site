@@ -2,7 +2,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { FIELD_GROUPS } from '../data/site.js'
-import { fetchMajors } from '../api/majors.js'
+import { fetchMajors, mapSubject } from '../api/majors.js'
+import { buildApiPath, peekApi } from '../api/client.js'
+import { prefetchMajor } from '../api/prefetch.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,8 +21,20 @@ watch(
 )
 
 async function loadMajors() {
-  loading.value = true
   error.value = ''
+  const params = {
+    per_page: 200,
+    page: 1,
+    search: searchQuery.value.trim() || undefined,
+  }
+  const cached = peekApi(buildApiPath('/majors', params))
+  if (cached?.data?.subjects?.data?.length) {
+    majors.value = cached.data.subjects.data.map(mapSubject).filter(Boolean)
+    loading.value = false
+  } else {
+    loading.value = true
+  }
+
   try {
     const result = await fetchMajors({
       search: searchQuery.value.trim(),
@@ -29,8 +43,10 @@ async function loadMajors() {
     majors.value = result.items
   } catch (e) {
     console.error(e)
-    error.value = e.message || 'Could not load majors'
-    majors.value = []
+    if (!majors.value.length) {
+      error.value = e.message || 'Could not load majors'
+      majors.value = []
+    }
   } finally {
     loading.value = false
   }
@@ -176,6 +192,7 @@ function clearSearch() {
           :key="major.slug"
           :to="`/major/${major.slug}`"
           class="group relative overflow-hidden rounded-[1.5rem] bg-[linear-gradient(180deg,#ffffff,#fcfcfd)] p-5 ring-1 ring-ink/8 transition duration-300 hover:-translate-y-1 hover:shadow-soft hover:ring-crimson/20"
+          @mouseenter="prefetchMajor(major.slug)"
         >
           <div
             class="absolute inset-0 opacity-100 transition duration-300 group-hover:opacity-100"

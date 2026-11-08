@@ -2,7 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useSiteSettings } from '../composables/useSiteSettings.js'
-import { fetchScholarshipOptions, fetchScholarships } from '../api/scholarships.js'
+import { fetchScholarshipOptions, fetchScholarships, mapScholarship } from '../api/scholarships.js'
+import { buildApiPath, peekApi } from '../api/client.js'
+import { prefetchScholarship } from '../api/prefetch.js'
 
 const { whatsapp: WHATSAPP } = useSiteSettings()
 
@@ -19,8 +21,15 @@ const filters = ref({
 })
 
 onMounted(async () => {
-  loading.value = true
   error.value = ''
+  const cached = peekApi(buildApiPath('/scholarships', { per_page: 100, page: 1 }))
+  if (cached?.data?.scholarships?.data?.length) {
+    scholarships.value = cached.data.scholarships.data.map(mapScholarship).filter(Boolean)
+    loading.value = false
+  } else {
+    loading.value = true
+  }
+
   try {
     const [result, optionLists] = await Promise.all([
       fetchScholarships({ perPage: 100 }),
@@ -30,7 +39,7 @@ onMounted(async () => {
     options.value = { ...options.value, ...optionLists }
   } catch (e) {
     console.error(e)
-    error.value = e.message || 'Could not load scholarships'
+    if (!scholarships.value.length) error.value = e.message || 'Could not load scholarships'
   } finally {
     loading.value = false
   }
@@ -116,7 +125,11 @@ function cell(value) {
               <tr v-for="row in rows" :key="row.slug" class="border-t border-black/5">
                 <td class="px-4 py-4 text-[#374151]">{{ cell(row.city) }}</td>
                 <td class="px-4 py-4">
-                  <RouterLink :to="`/scholarship/${row.slug}`" class="font-medium text-[#6d28d9] hover:underline">
+                  <RouterLink
+                    :to="`/scholarship/${row.slug}`"
+                    class="font-medium text-[#6d28d9] hover:underline"
+                    @mouseenter="prefetchScholarship(row.slug)"
+                  >
                     {{ row.name }}
                   </RouterLink>
                   <div v-if="row.coverage" class="mt-1 text-[11px] text-[#9ca3af]">{{ row.coverage }}</div>
