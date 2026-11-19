@@ -1,5 +1,5 @@
 import { api } from './client.js'
-import { mapPostToUniversity } from './universities.js'
+import { mapPostToUniversity, resolveMediaUrl } from './universities.js'
 
 export function mapScholarship(row) {
   if (!row) return null
@@ -11,7 +11,7 @@ export function mapScholarship(row) {
     universities: row.universities ?? 0,
     desc: row.desc || '',
     content: row.content || '',
-    image: row.image || null,
+    image: resolveMediaUrl(row.image) || row.image || null,
     city: row.city || '',
     programId: row.program_id || '',
     degree: row.degree || '',

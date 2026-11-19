@@ -59,62 +59,131 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="site-container py-10">
-    <div class="relative overflow-hidden rounded-2xl px-6 py-9 sm:px-10 sm:py-12" style="background: var(--color-secondary)">
-      <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full" style="background: var(--color-primary); opacity: 0.16"></div>
-      <div class="relative max-w-2xl">
-        <span class="text-[10.5px] font-semibold uppercase tracking-widest" style="color: var(--color-accent)">Get in touch</span>
-        <h1 class="mt-2 text-2xl font-extrabold text-white sm:text-3xl">Let's plan your study in China</h1>
-        <p class="mt-2.5 text-[13.5px] leading-relaxed" style="color: #aeb8c9">
-          Free counselling in Bangla — university choice, scholarships, admission and the student visa.
-        </p>
-      </div>
-    </div>
-
-    <div class="mt-6 grid gap-4 lg:grid-cols-[1fr_320px] lg:items-start">
-      <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
-        <div class="text-[16px] font-bold text-[var(--color-secondary)]">Send us a message</div>
-        <div class="mb-4 mt-0.5 text-[12.5px] text-gray-400">Saved to admin inquiries via API.</div>
-        <div v-if="submitted" class="mb-4 rounded-lg bg-green-50 px-4 py-3 text-[13px] text-green-700">
-          Message sent! We'll be in touch soon.
-        </div>
-        <div v-if="error" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-[13px] text-red-700">
-          {{ error }}
-        </div>
-        <form class="flex flex-col gap-2.5" @submit.prevent="onSubmit">
-          <div class="flex flex-col gap-2.5 sm:flex-row">
-            <input v-model="form.name" type="text" required placeholder="Full name" class="w-full rounded-[9px] border border-gray-300 px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]" />
-            <input v-model="form.phone" type="tel" required placeholder="Phone / WhatsApp" class="w-full rounded-[9px] border border-gray-300 px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]" />
+  <div>
+    <section class="relative overflow-hidden bg-gradient-to-br from-[#0A1628] via-[#132746] to-[#1f4b67] text-white">
+      <div class="pointer-events-none absolute inset-0 texture-grid opacity-25"></div>
+      <div class="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-crimson/20 blur-3xl"></div>
+      <div class="relative site-container py-10 sm:py-14 lg:py-16">
+        <div class="max-w-2xl">
+          <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/75">
+            <span class="h-1.5 w-1.5 rounded-full bg-jade"></span>
+            Get in touch
           </div>
-          <input v-model="form.email" type="email" placeholder="Email (optional)" class="w-full rounded-[9px] border border-gray-300 px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]" />
-          <select v-model="form.interest" class="w-full rounded-[9px] border border-gray-300 px-3 py-2.5 text-[13px] text-gray-600 focus:outline-none">
-            <option value="">I'm interested in…</option>
-            <option v-for="opt in interests" :key="opt" :value="opt">{{ opt }}</option>
-          </select>
-          <textarea v-model="form.message" rows="4" placeholder="Your message" class="w-full rounded-[9px] border border-gray-300 px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"></textarea>
-          <button type="submit" :disabled="submitting" class="rounded-[10px] py-3 text-[13.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60" style="background: var(--color-primary)">
-            {{ submitting ? 'Sending...' : 'Send message' }}
-          </button>
-        </form>
-      </div>
-
-      <div class="flex flex-col gap-2.5">
-        <a :href="WHATSAPP" target="_blank" rel="noopener" class="flex items-center gap-3 rounded-xl bg-[#16A34A] p-4 text-white">
-          <div><div class="text-[13.5px] font-bold">WhatsApp us</div><div class="text-[10.5px]" style="color: #dcfce7">Fastest reply</div></div>
-        </a>
-        <a :href="`tel:${PHONE}`" class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4">
-          <div><div class="text-[13px] font-bold text-[var(--color-secondary)]">Call us</div><div class="text-[10.5px] text-gray-400">{{ PHONE }}</div></div>
-        </a>
-        <a :href="`mailto:${EMAIL}`" class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4">
-          <div><div class="text-[13px] font-bold text-[var(--color-secondary)]">Email</div><div class="text-[10.5px] text-gray-400">{{ EMAIL }}</div></div>
-        </a>
-        <div class="rounded-xl border border-gray-200 bg-[#fbfbfc] p-4">
-          <div class="text-[12px] font-bold text-[var(--color-secondary)]">Why students trust us</div>
-          <ul class="mt-2 space-y-1.5">
-            <li v-for="item in trustReasons" :key="item" class="text-[11.5px] text-gray-500">• {{ item }}</li>
-          </ul>
+          <h1 class="mt-4 font-display text-[1.7rem] font-extrabold leading-tight tracking-tight sm:mt-5 sm:text-4xl">
+            Let's plan your study in China
+          </h1>
+          <p class="mt-3 max-w-xl text-[14.5px] leading-relaxed text-white/60 sm:mt-4 sm:text-[15px]">
+            Free counselling in Bangla — university choice, scholarships, admission and the student visa.
+          </p>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section class="site-container py-8 sm:py-10 lg:py-12">
+      <div class="grid gap-5 lg:grid-cols-[1fr_320px] lg:items-start lg:gap-8">
+        <div class="rounded-[1.5rem] bg-white p-5 ring-1 ring-ink/8 sm:rounded-[1.75rem] sm:p-7">
+          <div class="font-display text-lg font-bold text-ink sm:text-xl">Send us a message</div>
+          <p class="mt-1 text-[12.5px] text-ink/40">Saved to admin inquiries via API.</p>
+
+          <div v-if="submitted" class="mt-4 rounded-xl bg-jade/10 px-4 py-3 text-[13px] font-medium text-jade">
+            Message sent! We'll be in touch soon.
+          </div>
+          <div v-if="error" class="mt-4 rounded-xl bg-crimson/10 px-4 py-3 text-[13px] font-medium text-crimson">
+            {{ error }}
+          </div>
+
+          <form class="mt-5 flex flex-col gap-3.5" @submit.prevent="onSubmit">
+            <div class="flex flex-col gap-3.5 sm:flex-row">
+              <input
+                v-model="form.name"
+                type="text"
+                required
+                placeholder="Full name"
+                class="w-full rounded-xl border border-ink/12 bg-[#FCFCFD] px-3.5 py-2.5 text-[13.5px] text-ink outline-none focus:border-crimson focus:ring-2 focus:ring-crimson/15"
+              />
+              <input
+                v-model="form.phone"
+                type="tel"
+                required
+                placeholder="Phone / WhatsApp"
+                class="w-full rounded-xl border border-ink/12 bg-[#FCFCFD] px-3.5 py-2.5 text-[13.5px] text-ink outline-none focus:border-crimson focus:ring-2 focus:ring-crimson/15"
+              />
+            </div>
+            <input
+              v-model="form.email"
+              type="email"
+              placeholder="Email (optional)"
+              class="w-full rounded-xl border border-ink/12 bg-[#FCFCFD] px-3.5 py-2.5 text-[13.5px] text-ink outline-none focus:border-crimson focus:ring-2 focus:ring-crimson/15"
+            />
+            <select
+              v-model="form.interest"
+              class="w-full rounded-xl border border-ink/12 bg-[#FCFCFD] px-3.5 py-2.5 text-[13.5px] text-ink/70 outline-none focus:border-crimson focus:ring-2 focus:ring-crimson/15"
+            >
+              <option value="">I'm interested in…</option>
+              <option v-for="opt in interests" :key="opt" :value="opt">{{ opt }}</option>
+            </select>
+            <textarea
+              v-model="form.message"
+              rows="4"
+              placeholder="Your message"
+              class="w-full rounded-xl border border-ink/12 bg-[#FCFCFD] px-3.5 py-2.5 text-[13.5px] text-ink outline-none focus:border-crimson focus:ring-2 focus:ring-crimson/15"
+            ></textarea>
+            <button type="submit" :disabled="submitting" class="btn-primary w-full disabled:opacity-60">
+              {{ submitting ? 'Sending...' : 'Send message' }}
+            </button>
+          </form>
+        </div>
+
+        <aside class="flex flex-col gap-3">
+          <a
+            :href="WHATSAPP"
+            target="_blank"
+            rel="noopener"
+            class="flex items-center gap-3 rounded-[1.25rem] bg-[#16A34A] p-4 text-white transition hover:brightness-110 sm:p-5"
+          >
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
+              <i class="ti ti-brand-whatsapp text-[20px]"></i>
+            </span>
+            <div>
+              <div class="text-[14px] font-bold">WhatsApp us</div>
+              <div class="text-[11px] text-white/75">Fastest reply</div>
+            </div>
+          </a>
+          <a
+            :href="`tel:${PHONE}`"
+            class="flex items-center gap-3 rounded-[1.25rem] bg-white p-4 ring-1 ring-ink/8 sm:p-5"
+          >
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-crimson/10 text-crimson">
+              <i class="ti ti-phone text-[18px]"></i>
+            </span>
+            <div>
+              <div class="text-[14px] font-bold text-ink">Call us</div>
+              <div class="text-[11px] text-ink/40">{{ PHONE }}</div>
+            </div>
+          </a>
+          <a
+            :href="`mailto:${EMAIL}`"
+            class="flex items-center gap-3 rounded-[1.25rem] bg-white p-4 ring-1 ring-ink/8 sm:p-5"
+          >
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-ink/5 text-ink">
+              <i class="ti ti-mail text-[18px]"></i>
+            </span>
+            <div>
+              <div class="text-[14px] font-bold text-ink">Email</div>
+              <div class="text-[11px] text-ink/40">{{ EMAIL }}</div>
+            </div>
+          </a>
+          <div class="rounded-[1.25rem] bg-[#FBFAF7] p-4 ring-1 ring-ink/8 sm:p-5">
+            <div class="text-[12px] font-bold text-ink">Why students trust us</div>
+            <ul class="mt-3 space-y-2">
+              <li v-for="item in trustReasons" :key="item" class="flex items-start gap-2 text-[12.5px] text-ink/55">
+                <i class="ti ti-check text-[14px] text-crimson"></i>
+                {{ item }}
+              </li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
   </div>
 </template>

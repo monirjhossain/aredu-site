@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
-import { POPULAR_COURSES } from '../../data/popularCourses'
 
 const PALETTE = [
   { accent: '#E11D2E', soft: '#FCE8EA', icon: 'ti-book' },
@@ -17,27 +16,25 @@ const courses = ref([])
 const loading = ref(false)
 
 function decorate(row, i) {
-  const curated = POPULAR_COURSES.find((c) => c.slug === row.slug)
   const palette = PALETTE[i % PALETTE.length]
   const uniCount = row.universities ?? row.uniCount ?? 0
   return {
     slug: row.slug,
     name: row.name,
-    field: row.field || curated?.field || 'General',
-    degree: row.degree || curated?.degree || 'Bachelor',
+    field: row.field || 'General',
+    degree: row.degree || 'Bachelor',
     universities: uniCount,
     demand: uniCount >= 30 ? 'Very High' : uniCount >= 15 ? 'High' : 'Rising',
-    icon: curated?.icon || palette.icon,
-    accent: curated?.accent || palette.accent,
-    soft: curated?.soft || palette.soft,
+    icon: palette.icon,
+    accent: palette.accent,
+    soft: palette.soft,
   }
 }
 
 const { majors } = useHomeBootstrap()
 
 function applyMajors(list) {
-  const items = (list || []).map(decorate)
-  courses.value = items.length ? items : POPULAR_COURSES.map((c, i) => decorate(c, i))
+  courses.value = (list || []).map(decorate)
   loading.value = false
 }
 
@@ -67,7 +64,7 @@ const total = computed(() => courses.value.length)
 </script>
 
 <template>
-  <section class="relative overflow-hidden pb-14 pt-28 sm:pb-16 sm:pt-32 lg:pb-20 lg:pt-36">
+  <section v-if="courses.length" class="relative overflow-hidden pb-14 pt-28 sm:pb-16 sm:pt-32 lg:pb-20 lg:pt-36">
     <div class="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#E8F3F1]/70 to-transparent" />
 
     <div class="relative site-container">

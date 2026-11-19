@@ -8,6 +8,8 @@
   --color-accent: #0f766e;
   --color-sand: #f4f1ec;
   --color-mist: #e8eef4;
+  --color-soft: #f7f5f2;
+  --color-surface: #f4f6f8;
   --font-display: 'Nunito Sans', system-ui, 'Segoe UI', sans-serif;
   --font-body: 'Nunito Sans', system-ui, 'Segoe UI', sans-serif;
   --site-max: 1120px;
@@ -94,8 +96,20 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-  outline: none;
+textarea:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible {
+  outline-color: #fff;
+  box-shadow: 0 0 0 3px rgba(225, 29, 46, 0.35);
+}
+
+.btn-ghost:focus-visible {
+  outline-color: var(--color-secondary);
 }
 
 .texture-grid {
@@ -118,19 +132,57 @@ textarea:focus-visible {
   max-width: var(--site-max);
   margin-left: auto;
   margin-right: auto;
-  padding: 3.5rem 1rem;
+  padding: 2.75rem 1rem;
 }
 
 @media (min-width: 640px) {
   .section-pad {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding: 3.5rem 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .section-pad {
     padding: 5rem 2rem;
+  }
+}
+
+.defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 320px;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.fab-stack {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 639px) {
+  .btn-primary,
+  .btn-ghost,
+  .btn-secondary {
+    min-height: 44px;
+  }
+
+  /* Full-width only when stacked alone — CTA rows can stay side-by-side */
+  .btn-stack > .btn-primary,
+  .btn-stack > .btn-ghost,
+  .btn-stack > .btn-secondary {
+    width: 100%;
   }
 }
 

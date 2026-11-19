@@ -2,16 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 
-const FALLBACK_VIDEOS = [
-  { id: 'ysz5S6PUM-U', title: 'How to study in China from Bangladesh', tag: 'Student guide' },
-  { id: 'ScMzIvxBSi4', title: 'Scholarship and admission roadmap', tag: 'Scholarship tips' },
-  { id: 'aqz-KE-bpKQ', title: 'University life and student journey', tag: 'Campus story' },
-  { id: 'M7lc1UVf-VE', title: 'Visa and pre-departure support', tag: 'Visa help' },
-  { id: 'dQw4w9WgXcQ', title: 'Choosing the right university path', tag: 'University shortlist' },
-  { id: '3fumBcKC6RE', title: 'What to expect before landing in China', tag: 'Pre-departure' },
-]
-
-const videos = ref(FALLBACK_VIDEOS.slice())
+const videos = ref([])
 const index = ref(0)
 const activeVideo = ref(null)
 
@@ -38,8 +29,7 @@ function goTo(next) {
 const { videos: homeVideos } = useHomeBootstrap()
 
 function applyVideos(rows) {
-  if (!rows?.length) return
-  videos.value = rows
+  videos.value = rows?.length ? rows : []
   index.value = 0
 }
 
@@ -59,7 +49,7 @@ function closeVideo() {
 </script>
 
 <template>
-  <section class="site-container pb-14 sm:pb-16">
+  <section v-if="videos.length" class="site-container pb-14 sm:pb-16">
     <div class="reel-stage relative overflow-hidden rounded-[2rem] text-white ring-1 ring-white/10 lg:rounded-[2.75rem]">
       <div class="pointer-events-none absolute -left-16 top-0 h-64 w-64 rounded-full bg-crimson/20 blur-3xl"></div>
       <div class="pointer-events-none absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-jade/15 blur-3xl"></div>
@@ -86,20 +76,22 @@ function closeVideo() {
       </div>
 
       <div class="relative px-4 pb-7 sm:px-6 lg:px-8 lg:pb-9">
-        <div class="flex items-end gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-[1.25fr_0.85fr_0.85fr_0.85fr] lg:items-stretch lg:gap-4 lg:overflow-visible lg:pb-0">
+        <div class="flex snap-x snap-mandatory items-end gap-3 overflow-x-auto pb-2 scrollbar-none lg:grid lg:snap-none lg:grid-cols-[1.25fr_0.85fr_0.85fr_0.85fr] lg:items-stretch lg:gap-4 lg:overflow-visible lg:pb-0">
           <button
             v-if="visibleVideos[0]"
             type="button"
-            class="reel-card reel-card-feature min-w-[78vw] sm:min-w-[340px] lg:min-w-0"
+            class="reel-card reel-card-feature min-w-[78vw] shrink-0 snap-center sm:min-w-[340px] lg:min-w-0"
             @click="openVideo(visibleVideos[0])"
           >
             <span class="reel-bezel aspect-[4/5]">
-              <iframe
-                class="pointer-events-none absolute inset-0 h-full w-full scale-[1.22] origin-center"
-                :src="`https://www.youtube.com/embed/${visibleVideos[0].id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${visibleVideos[0].id}&playsinline=1&modestbranding=1&rel=0`"
-                title="Video"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              ></iframe>
+              <img
+                :src="poster(visibleVideos[0].id)"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                class="absolute inset-0 h-full w-full scale-110 object-cover transition duration-700 group-hover:scale-125"
+              />
+              <span class="reel-shade"></span>
               <span class="reel-glass"></span>
               <span class="reel-play">
                 <i class="ti ti-player-play-filled ml-0.5 text-[18px]"></i>
@@ -111,7 +103,7 @@ function closeVideo() {
             v-for="(video, sideIndex) in visibleVideos.slice(1)"
             :key="`${video.id}-${index}-${sideIndex}`"
             type="button"
-            class="reel-card min-w-[58vw] sm:min-w-[220px] lg:min-w-0"
+            class="reel-card min-w-[58vw] shrink-0 snap-center sm:min-w-[220px] lg:min-w-0"
             :style="{ transitionDelay: `${sideIndex * 40}ms` }"
             @click="openVideo(video)"
           >
@@ -119,6 +111,8 @@ function closeVideo() {
               <img
                 :src="poster(video.id)"
                 alt=""
+                loading="lazy"
+                decoding="async"
                 class="absolute inset-0 h-full w-full scale-110 object-cover transition duration-700 group-hover:scale-125"
               />
               <span class="reel-shade"></span>
@@ -260,18 +254,25 @@ function closeVideo() {
   color: white;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(8px);
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .reel-play-sm {
-  opacity: 1;
   height: 3rem;
   width: 3rem;
 }
 
 .reel-card:hover .reel-play {
-  opacity: 1;
   transform: translate(-50%, -50%) scale(1.05);
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 </style>

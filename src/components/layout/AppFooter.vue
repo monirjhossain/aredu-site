@@ -1,21 +1,12 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import { SERVICES } from '../../data/site.js'
-import { fetchServices } from '../../api/services.js'
 import { useSiteSettings } from '../../composables/useSiteSettings.js'
+import { useSiteCatalogs } from '../../composables/useSiteCatalogs.js'
 
 const { brand, phone, email, address, whatsapp, facebook, youtube } = useSiteSettings()
-const services = ref(SERVICES.slice(0, 4))
-
-onMounted(async () => {
-  try {
-    const result = await fetchServices({ perPage: 8 })
-    if (result.items?.length) services.value = result.items.slice(0, 4)
-  } catch (e) {
-    console.error(e)
-  }
-})
+const { services: allServices } = useSiteCatalogs()
+const services = computed(() => (allServices.value || []).slice(0, 4))
 </script>
 
 <template>

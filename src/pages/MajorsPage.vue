@@ -1,13 +1,14 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import { FIELD_GROUPS } from '../data/site.js'
 import { fetchMajors, mapSubject } from '../api/majors.js'
+import { useSiteCatalogs } from '../composables/useSiteCatalogs.js'
 import { buildApiPath, peekApi } from '../api/client.js'
 import { prefetchMajor } from '../api/prefetch.js'
 
 const route = useRoute()
 const router = useRouter()
+const { fieldGroups: FIELD_GROUPS } = useSiteCatalogs()
 const searchQuery = ref(route.query.q?.toString() || '')
 const loading = ref(true)
 const error = ref('')

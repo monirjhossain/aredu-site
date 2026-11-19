@@ -2,14 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 
-const FALLBACK_SLIDES = [
-  { id: 1, title: 'Visa approved smiles', place: 'Dhaka office', image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80' },
-  { id: 2, title: 'Admission confirmation moment', place: 'Student desk', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80' },
-  { id: 3, title: 'Scholarship guidance session', place: 'Counselling room', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80' },
-  { id: 4, title: 'Parents consultation day', place: 'AR Education', image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80' },
-]
-
-const slides = ref(FALLBACK_SLIDES.slice())
+const slides = ref([])
 const index = ref(0)
 const paused = ref(false)
 let timer = null
@@ -33,6 +26,7 @@ function go(step) {
 
 function start() {
   stop()
+  if (slides.value.length <= 1) return
   timer = setInterval(() => {
     if (!paused.value) go(1)
   }, 2800)
@@ -46,13 +40,12 @@ function stop() {
 const { successPhotos } = useHomeBootstrap()
 
 function applyPhotos(rows) {
-  if (!rows?.length) return
-  slides.value = rows
+  slides.value = rows?.length ? rows : []
   index.value = 0
+  start()
 }
 
 onMounted(() => {
-  start()
   applyPhotos(successPhotos.value)
 })
 
@@ -61,7 +54,7 @@ onUnmounted(stop)
 </script>
 
 <template>
-  <section class="site-container py-14 sm:py-16">
+  <section v-if="slides.length" class="site-container py-14 sm:py-16">
     <div class="overflow-hidden rounded-[2rem] bg-white ring-1 ring-ink/8 lg:rounded-[2.5rem]">
       <div class="flex flex-col gap-5 border-b border-ink/8 px-6 py-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between lg:px-10">
         <div class="max-w-2xl">
@@ -103,14 +96,20 @@ onUnmounted(stop)
           <div class="text-[12px] font-semibold text-crimson">{{ index + 1 }} / {{ slides.length }}</div>
         </div>
 
-        <div class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4">
+        <div class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4">
           <div
             v-for="slide in visibleSlides"
             :key="`${slide.id}-${index}`"
-            class="group min-w-[74vw] snap-start overflow-hidden rounded-[1.45rem] bg-white ring-1 ring-ink/8 transition duration-300 hover:-translate-y-1 hover:shadow-soft sm:min-w-0"
+            class="group min-w-[78vw] shrink-0 snap-center overflow-hidden rounded-[1.45rem] bg-white ring-1 ring-ink/8 transition duration-300 hover:-translate-y-1 hover:shadow-soft sm:min-w-0"
           >
             <div class="relative aspect-[210/297] overflow-hidden">
-              <img :src="slide.image" :alt="slide.title" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+              <img
+                :src="slide.image"
+                :alt="slide.title"
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
               <div class="absolute inset-0 bg-gradient-to-t from-[#08111d]/85 via-[#08111d]/20 to-transparent"></div>
               <div class="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-ink shadow-sm">
                 Photo {{ photoNumber(slide) }}

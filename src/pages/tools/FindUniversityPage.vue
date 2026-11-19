@@ -1,8 +1,8 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { DEGREES } from '../../data/site.js'
 import { useUniversitiesCatalog } from '../../composables/useUniversitiesCatalog.js'
+import { useSiteCatalogs } from '../../composables/useSiteCatalogs.js'
 import UniversityCard from '../../components/ui/UniversityCard.vue'
 
 const step = ref(1)
@@ -13,17 +13,22 @@ const answers = ref({
   city: '',
 })
 
+const { degrees: DEGREES, fieldGroups } = useSiteCatalogs()
 const { items: universities, loading, load } = useUniversitiesCatalog()
 onMounted(() => load())
 
-const fields = [
-  'Engineering & Technology',
-  'Computer Science & IT',
-  'Business & Economics',
-  'Medicine / MBBS',
-  'Chinese Language',
-  'Any field',
-]
+const fields = computed(() => {
+  const groups = fieldGroups.value || []
+  const preferred = [
+    'Engineering & Technology',
+    'Computer Science & IT',
+    'Business & Economics',
+    'Chinese Language & Preparatory',
+  ]
+  const picked = preferred.filter((name) => groups.includes(name))
+  const base = picked.length ? picked : groups.slice(0, 5)
+  return [...base, 'Medicine / MBBS', 'Any field'].filter((v, i, arr) => arr.indexOf(v) === i)
+})
 
 const budgets = [
   { value: 'low', label: 'Budget-friendly (under ¥15k/year)' },
@@ -92,7 +97,7 @@ const canNext = computed(() => {
   return true
 })
 
-const degreeLabel = computed(() => DEGREES.find((d) => d.slug === answers.value.degree)?.name || 'Not selected')
+const degreeLabel = computed(() => DEGREES.value.find((d) => d.slug === answers.value.degree)?.name || 'Not selected')
 const budgetLabel = computed(() => budgets.find((b) => b.value === answers.value.budget)?.label || 'Not selected')
 const cityLabel = computed(() => cityPrefs.find((c) => c.value === answers.value.city)?.label || 'Not selected')
 </script>

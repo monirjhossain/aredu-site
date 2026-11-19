@@ -1,9 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { DEGREES } from '../../data/site.js'
 import { fetchScholarships } from '../../api/scholarships.js'
+import { useSiteCatalogs } from '../../composables/useSiteCatalogs.js'
 
+const { degrees: DEGREES } = useSiteCatalogs()
 const gpa = ref('')
 const degree = ref('')
 const checked = ref(false)
@@ -25,10 +26,15 @@ onMounted(async () => {
 const matched = computed(() => {
   if (!checked.value) return []
   const score = parseFloat(gpa.value) || 0
+  const degreeName = (degreeLabel.value || '').toLowerCase()
   return scholarships.value.filter((sch) => {
     const coverage = String(sch.coverage || '').toLowerCase()
     if (coverage.includes('full') && score < 3.0) return false
     if (coverage.includes('partial') && score < 2.5) return false
+    const schDegree = String(sch.degree || '').toLowerCase()
+    if (schDegree && degreeName && degreeName !== 'not selected') {
+      if (!schDegree.includes(degreeName) && !degreeName.includes(schDegree)) return false
+    }
     return true
   })
 })
@@ -37,7 +43,7 @@ function check() {
   if (gpa.value && degree.value) checked.value = true
 }
 
-const degreeLabel = computed(() => DEGREES.find((d) => d.slug === degree.value)?.name || 'Not selected')
+const degreeLabel = computed(() => DEGREES.value.find((d) => d.slug === degree.value)?.name || 'Not selected')
 
 const profileNote = computed(() => {
   const score = parseFloat(gpa.value) || 0

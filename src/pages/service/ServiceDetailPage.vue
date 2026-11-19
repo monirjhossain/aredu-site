@@ -71,36 +71,41 @@ watch(() => route.params.slug, load)
           <h1 class="mt-5 font-display text-[1.9rem] font-extrabold leading-tight sm:text-4xl">{{ service.name }}</h1>
           <p class="mt-4 text-[15px] leading-relaxed text-white/65">{{ service.short }}</p>
           <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-            <RouterLink to="/contact" class="rounded-xl bg-white px-5 py-2.5 text-center text-[13px] font-semibold text-ink">Contact us</RouterLink>
-            <a :href="whatsapp" target="_blank" rel="noopener" class="rounded-xl bg-[#16A34A] px-5 py-2.5 text-center text-[13px] font-semibold text-white">WhatsApp</a>
+            <RouterLink to="/contact" class="inline-flex w-full items-center justify-center rounded-xl bg-white px-5 py-3 text-[13px] font-semibold text-ink sm:w-auto">Contact us</RouterLink>
+            <a :href="whatsapp" target="_blank" rel="noopener" class="inline-flex w-full items-center justify-center rounded-xl bg-[#16A34A] px-5 py-3 text-[13px] font-semibold text-white sm:w-auto">WhatsApp</a>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="site-container py-10">
-      <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <div class="prose max-w-none rounded-2xl border border-ink/8 bg-white p-6 sm:p-8" v-html="service.content" />
-        <div>
-          <h2 class="font-display text-xl font-extrabold text-ink">Other services</h2>
-          <div class="mt-4 space-y-3">
-            <RouterLink
-              v-for="s in otherServices"
-              :key="s.slug"
-              :to="`/service/${s.slug}`"
-              class="block rounded-2xl border border-ink/8 bg-white p-4 hover:border-crimson/30"
-            >
-              <div class="font-semibold text-ink">{{ s.name }}</div>
-              <div class="mt-1 text-[12px] text-ink/50">{{ s.short }}</div>
-            </RouterLink>
+    <section class="site-container py-8 sm:py-10 lg:py-12">
+      <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-8">
+        <article
+          class="prose prose-ink max-w-none rounded-[1.5rem] bg-white p-5 ring-1 ring-ink/8 sm:rounded-[1.75rem] sm:p-8 prose-headings:font-display prose-headings:text-ink prose-p:text-ink/60 prose-a:text-crimson"
+          v-html="service.content"
+        />
+        <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          <div class="rounded-[1.5rem] bg-white p-5 ring-1 ring-ink/8 sm:p-6">
+            <h2 class="font-display text-lg font-extrabold text-ink sm:text-xl">Other services</h2>
+            <div class="mt-4 space-y-3">
+              <RouterLink
+                v-for="s in otherServices"
+                :key="s.slug"
+                :to="`/service/${s.slug}`"
+                class="block rounded-[1.15rem] bg-[#F8F9FB] p-4 transition hover:bg-white hover:ring-1 hover:ring-crimson/25"
+              >
+                <div class="font-semibold text-ink">{{ s.name }}</div>
+                <div class="mt-1 text-[12px] leading-relaxed text-ink/50">{{ s.short }}</div>
+              </RouterLink>
+            </div>
           </div>
-          <div class="mt-8">
+          <div class="rounded-[1.5rem] bg-white p-5 ring-1 ring-ink/8 sm:p-6">
             <h3 class="font-display text-lg font-extrabold text-ink">FAQs</h3>
             <div class="mt-3 grid gap-2">
               <FaqItem v-for="faq in relatedFaqs" :key="faq.q" :q="faq.q" :a="faq.a" />
             </div>
           </div>
-        </div>
+        </aside>
       </div>
     </section>
   </div>

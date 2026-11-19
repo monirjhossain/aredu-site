@@ -19,7 +19,21 @@ function categoryName(post) {
   return post?.categories?.[0]?.name || null
 }
 
+function categoryProvince(post) {
+  const cats = post?.categories || []
+  if (cats.length > 1) return cats[1]?.name || cats[0]?.name || null
+  return cats[0]?.name || null
+}
+
+function metaValue(post, key) {
+  const rows = post?.post_metas || post?.postMetas || []
+  const hit = rows.find((m) => m?.meta_key === key)
+  return hit?.meta_value ?? null
+}
+
 function hasScholarship(post) {
+  const meta = String(metaValue(post, 'scholarship') || '').toLowerCase()
+  if (['1', 'yes', 'true'].includes(meta)) return true
   const tags = post?.tags || []
   if (tags.some((t) => /scholarship/i.test(t.name || ''))) return true
   const hay = `${post?.post_title || ''} ${post?.post_content || ''}`
@@ -37,7 +51,6 @@ export function resolveMediaUrl(url) {
   const uploadsIdx = value.indexOf('/uploads/')
   if (uploadsIdx !== -1) {
     const path = value.slice(uploadsIdx)
-    // Local dev uses the Vite /uploads proxy. A live build must hit the Laravel host.
     if (/^https?:\/\//i.test(apiBase)) {
       const origin = apiBase.replace(/\/api$/i, '')
       return `${origin}${path}`
@@ -54,18 +67,24 @@ export function resolveMediaUrl(url) {
  */
 export function mapPostToUniversity(post, index = 0) {
   if (!post) return null
-  const city = categoryName(post) || 'China'
+  const city = categoryName(post) || metaValue(post, 'city') || 'China'
+  const province = metaValue(post, 'province') || categoryProvince(post) || city
+  const rankingMeta = Number(metaValue(post, 'ranking'))
+  const viewsMeta = Number(metaValue(post, 'views'))
+  const codeMeta = metaValue(post, 'code')
+
   return {
     id: post.id,
     slug: post.post_name || String(post.id),
     name: post.post_title || 'University',
-    code: makeCode(post.post_title),
+    code: codeMeta || makeCode(post.post_title),
     city,
-    province: city,
-    ranking: Number(post.id) || index + 1,
-    views: Math.max(10, 200 - (index % 100)),
+    province,
+    ranking: Number.isFinite(rankingMeta) && rankingMeta > 0 ? rankingMeta : Number(post.id) || index + 1,
+    views: Number.isFinite(viewsMeta) && viewsMeta >= 0 ? viewsMeta : Math.max(10, 200 - (index % 100)),
     scholarship: hasScholarship(post),
     image: resolveMediaUrl(post.image_url || post.image),
+    subjects: (post.subjects || []).map((s) => s.name).filter(Boolean),
     content: post.post_content || '',
     excerpt: String(post.post_content || '')
       .replace(/<[^>]*>/g, ' ')

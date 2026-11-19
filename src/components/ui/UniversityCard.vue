@@ -86,7 +86,7 @@ defineProps({
           class="rounded-full bg-jade/10 px-3 py-1 text-[10.5px] font-semibold text-jade"
         >Scholarship available</span>
         <span v-else class="rounded-full bg-ink/5 px-3 py-1 text-[10.5px] text-ink/35">Admission open</span>
-        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-crimson opacity-0 transition group-hover:opacity-100">
+        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-crimson opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible:opacity-100">
           View
           <i class="ti ti-arrow-right text-[13px]"></i>
         </span>

@@ -1,8 +1,9 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { TOOLS } from '../../../data/site'
+import { useSiteCatalogs } from '../../../composables/useSiteCatalogs.js'
 
 defineEmits(['close'])
+const { tools } = useSiteCatalogs()
 </script>
 
 <template>
@@ -17,7 +18,7 @@ defineEmits(['close'])
 
       <div class="grid gap-x-8 sm:grid-cols-2">
         <RouterLink
-          v-for="(t, i) in TOOLS"
+          v-for="(t, i) in tools"
           :key="t.to"
           :to="t.to"
           class="group flex items-start gap-3 border-b border-ink/8 py-3.5"

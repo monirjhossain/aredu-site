@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchUniversities, mapPostToUniversity } from '../api/universities.js'
+import { fetchCities } from '../api/cities.js'
 import { buildApiPath, peekApi } from '../api/client.js'
 import UniversityCard from '../components/ui/UniversityCard.vue'
 import NeedHelpBanner from '../components/ui/NeedHelpBanner.vue'
@@ -15,10 +16,12 @@ const sortBy = ref('name')
 const searchQuery = ref(route.query.q?.toString() || '')
 const selectedCity = ref('all')
 const scholarshipOnly = ref(false)
+const filtersOpen = ref(false)
 const loading = ref(false)
 const error = ref('')
 const universities = ref([])
 const totalFromApi = ref(0)
+const cityNames = ref([])
 
 watch(
   () => route.query.q,
@@ -49,6 +52,8 @@ async function loadUniversities() {
     const result = await fetchUniversities({
       search: searchQuery.value.trim(),
       perPage: 100,
+      city: selectedCity.value !== 'all' ? selectedCity.value : '',
+      scholarship: scholarshipOnly.value,
     })
     universities.value = result.items
     totalFromApi.value = result.total
@@ -63,11 +68,20 @@ async function loadUniversities() {
   }
 }
 
-onMounted(loadUniversities)
+onMounted(async () => {
+  try {
+    const cities = await fetchCities({ perPage: 200 })
+    cityNames.value = (cities.items || []).map((c) => c.name).filter(Boolean)
+  } catch (e) {
+    console.error(e)
+  }
+  await loadUniversities()
+})
 
-const cityOptions = computed(() =>
-  ['all', ...new Set(universities.value.map((u) => u.city).filter(Boolean))],
-)
+const cityOptions = computed(() => {
+  const fromUnis = universities.value.map((u) => u.city).filter(Boolean)
+  return ['all', ...new Set([...cityNames.value, ...fromUnis])]
+})
 
 const filtered = computed(() => {
   let list = [...universities.value]
@@ -111,12 +125,17 @@ function onSearch() {
   loadUniversities()
 }
 
+const activeFilterCount = computed(() =>
+  [selectedCity.value !== 'all', scholarshipOnly.value, searchQuery.value.trim()].filter(Boolean).length,
+)
+
 function clearFilters() {
   selectedCity.value = 'all'
   scholarshipOnly.value = false
   searchQuery.value = ''
   sortBy.value = 'name'
   page.value = 1
+  filtersOpen.value = false
   router.push({ path: '/universities' })
   loadUniversities()
 }
@@ -192,9 +211,22 @@ function clearFilters() {
             {{ filtered.length }} universities found
           </h2>
         </div>
-        <div class="rounded-full bg-[#F7F8FA] px-4 py-2 text-[13px] font-medium text-ink/55">
-          <span v-if="loading">Loading...</span>
-          <span v-else>Showing {{ paginated.length }} on this page</span>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white px-4 py-2 text-[13px] font-semibold text-ink lg:hidden"
+            @click="filtersOpen = !filtersOpen"
+          >
+            <i class="ti ti-filter"></i>
+            Filters
+            <span v-if="activeFilterCount" class="rounded-full bg-crimson px-2 py-0.5 text-[11px] text-white">
+              {{ activeFilterCount }}
+            </span>
+          </button>
+          <div class="rounded-full bg-[#F7F8FA] px-4 py-2 text-[13px] font-medium text-ink/55">
+            <span v-if="loading">Loading...</span>
+            <span v-else>Showing {{ paginated.length }} on this page</span>
+          </div>
         </div>
       </div>
 
@@ -204,16 +236,26 @@ function clearFilters() {
       </div>
 
       <div class="grid gap-6 lg:grid-cols-[280px_1fr] lg:gap-8">
-        <aside class="space-y-4">
+        <aside class="space-y-4" :class="filtersOpen ? 'block' : 'hidden lg:block'">
           <div class="rounded-[1.5rem] bg-white p-5 ring-1 ring-ink/8">
-            <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/35">Quick filters</div>
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/35">Quick filters</div>
+              <button
+                v-if="activeFilterCount"
+                type="button"
+                class="text-[12px] font-semibold text-crimson hover:underline"
+                @click="clearFilters"
+              >
+                Clear all
+              </button>
+            </div>
             <div class="mt-4 space-y-3">
               <div>
                 <label class="mb-2 block text-[12px] font-semibold text-ink/45">City / Category</label>
                 <select
                   v-model="selectedCity"
                   class="w-full rounded-xl border border-ink/10 bg-[#F7F8FA] px-4 py-3 text-[13px] text-ink outline-none focus:border-crimson"
-                  @change="page = 1"
+                  @change="page = 1; loadUniversities()"
                 >
                   <option v-for="city in cityOptions" :key="city" :value="city">
                     {{ city === 'all' ? 'All cities' : city }}
@@ -221,7 +263,12 @@ function clearFilters() {
                 </select>
               </div>
               <label class="flex items-center gap-3 rounded-xl bg-[#F7F8FA] px-4 py-3 text-[13px] text-ink/70">
-                <input v-model="scholarshipOnly" type="checkbox" class="rounded" @change="page = 1" />
+                <input
+                  v-model="scholarshipOnly"
+                  type="checkbox"
+                  class="rounded"
+                  @change="page = 1; loadUniversities()"
+                />
                 Scholarship available
               </label>
               <button
@@ -233,7 +280,9 @@ function clearFilters() {
               </button>
             </div>
           </div>
-          <NeedHelpBanner />
+          <div class="hidden lg:block">
+            <NeedHelpBanner />
+          </div>
         </aside>
 
         <div>

@@ -100,84 +100,151 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="apply-page">
-    <div class="apply-wrap">
-      <RouterLink to="/scholarships" class="back-link">Back to programs</RouterLink>
+  <div class="min-h-[70vh] bg-[#F4F6F8] pb-12 pt-6 sm:pb-16 sm:pt-8">
+    <div class="site-container max-w-3xl">
+      <RouterLink
+        to="/scholarships"
+        class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-crimson hover:underline"
+      >
+        <i class="ti ti-arrow-left text-[14px]"></i>
+        Back to programs
+      </RouterLink>
 
-      <div v-if="loading" class="sheet skeleton" />
+      <div v-if="loading" class="mt-4 h-[420px] animate-pulse rounded-[1.5rem] bg-white ring-1 ring-ink/8 sm:h-[520px]"></div>
 
-      <div v-else-if="!program" class="sheet empty">{{ error || 'Program not found' }}</div>
+      <div
+        v-else-if="!program"
+        class="mt-4 rounded-[1.5rem] bg-white px-6 py-14 text-center text-[14px] text-ink/50 ring-1 ring-ink/8"
+      >
+        {{ error || 'Program not found' }}
+      </div>
 
-      <div v-else class="sheet">
-        <header class="hero">
-          <div>
-            <p class="eyebrow">Scholarship application</p>
-            <h1>Fill in student info</h1>
-            <p class="program-name">{{ program.name }}</p>
-          </div>
+      <div v-else class="mt-4 overflow-hidden rounded-[1.5rem] bg-white shadow-lift ring-1 ring-ink/8 sm:rounded-[1.75rem]">
+        <header class="border-b border-ink/6 bg-gradient-to-b from-[#FBFAF7] to-white px-5 py-6 sm:px-8 sm:py-7">
+          <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-crimson">Scholarship application</p>
+          <h1 class="mt-2 font-display text-[1.55rem] font-extrabold leading-tight tracking-tight text-ink sm:text-[1.9rem]">
+            Fill in student info
+          </h1>
+          <p class="mt-2 text-[13.5px] leading-relaxed text-ink/50 sm:text-[14px]">{{ program.name }}</p>
         </header>
 
-        <div class="facts">
-          <div v-for="item in facts" :key="item.label" class="fact">
-            <span>{{ item.label }}</span>
-            <strong>{{ item.value }}</strong>
+        <div class="grid grid-cols-2 gap-2 px-4 py-4 sm:grid-cols-3 sm:gap-3 sm:px-8 sm:py-5 lg:grid-cols-4">
+          <div
+            v-for="item in facts"
+            :key="item.label"
+            class="rounded-xl bg-[#F8F9FB] px-3 py-2.5 sm:rounded-[0.9rem] sm:px-3.5 sm:py-3"
+          >
+            <span class="block text-[10px] font-medium text-ink/40 sm:text-[11px]">{{ item.label }}</span>
+            <strong class="mt-0.5 block text-[12.5px] font-semibold text-ink sm:text-[13px]">{{ item.value }}</strong>
           </div>
         </div>
 
-        <div v-if="submitted" class="done">
-          <h2>Application received</h2>
-          <p>A counsellor will contact you about this program.</p>
-          <p v-if="trackingId" class="track">Tracking ID {{ trackingId }}</p>
+        <div v-if="submitted" class="px-5 py-12 text-center sm:px-8 sm:py-16">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-jade/15 text-jade">
+            <i class="ti ti-check text-xl"></i>
+          </div>
+          <h2 class="mt-4 font-display text-xl font-extrabold text-ink sm:text-2xl">Application received</h2>
+          <p class="mt-2 text-[14px] text-ink/50">A counsellor will contact you about this program.</p>
+          <p v-if="trackingId" class="mt-3 text-[13px] font-bold text-crimson">Tracking ID {{ trackingId }}</p>
         </div>
 
-        <form v-else @submit.prevent="onSubmit">
+        <form v-else class="space-y-7 px-4 pb-6 pt-2 sm:space-y-8 sm:px-8 sm:pb-8" @submit.prevent="onSubmit">
           <section>
-            <h2>Personal</h2>
-            <div class="grid">
-              <label>Given name *<input v-model="form.givenName" required /></label>
-              <label>Family name<input v-model="form.familyName" /></label>
-              <label>Gender
-                <select v-model="form.gender">
+            <h2 class="mb-3 border-b border-ink/8 pb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-ink/45 sm:mb-4">
+              Personal
+            </h2>
+            <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Given name *
+                <input v-model="form.givenName" required class="field" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Family name
+                <input v-model="form.familyName" class="field" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Gender
+                <select v-model="form.gender" class="field">
                   <option value="">Select</option>
                   <option>Male</option>
                   <option>Female</option>
                 </select>
               </label>
-              <label>Date of birth<input v-model="form.birthday" type="date" /></label>
-              <label>Passport number<input v-model="form.passport" /></label>
-              <label>Nationality<input v-model="form.nationality" /></label>
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Date of birth
+                <input v-model="form.birthday" type="date" class="field" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Passport number
+                <input v-model="form.passport" class="field" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Nationality
+                <input v-model="form.nationality" class="field" />
+              </label>
             </div>
           </section>
 
           <section>
-            <h2>Contact</h2>
-            <div class="grid">
-              <label>Email *<input v-model="form.email" type="email" required /></label>
-              <label>Mobile *<input v-model="form.mobile" required placeholder="01XXXXXXXXX" /></label>
+            <h2 class="mb-3 border-b border-ink/8 pb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-ink/45 sm:mb-4">
+              Contact
+            </h2>
+            <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Email *
+                <input v-model="form.email" type="email" required class="field" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Mobile *
+                <input v-model="form.mobile" required placeholder="01XXXXXXXXX" class="field" />
+              </label>
             </div>
           </section>
 
           <section>
-            <h2>Education</h2>
-            <div class="grid three">
-              <label>Last education
-                <select v-model="form.lastEducation">
+            <h2 class="mb-3 border-b border-ink/8 pb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-ink/45 sm:mb-4">
+              Education
+            </h2>
+            <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-3 sm:gap-4">
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Last education
+                <select v-model="form.lastEducation" class="field">
                   <option value="">Select last education</option>
                   <option v-for="level in educationLevels" :key="level" :value="level">{{ level }}</option>
                 </select>
               </label>
-              <label>Result<input v-model="form.result" placeholder="GPA" /></label>
-              <label>Passing year<input v-model="form.passingYear" placeholder="2024" /></label>
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Result
+                <input v-model="form.result" placeholder="GPA" class="field" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+                Passing year
+                <input v-model="form.passingYear" placeholder="2024" class="field" />
+              </label>
             </div>
           </section>
 
-          <label class="note">Additional note<textarea v-model="form.note" rows="3"></textarea></label>
+          <label class="flex flex-col gap-1.5 text-[12px] font-semibold text-ink/60">
+            Additional note
+            <textarea v-model="form.note" rows="3" class="field"></textarea>
+          </label>
 
-          <p v-if="error" class="error">{{ error }}</p>
+          <p v-if="error" class="text-[13px] font-medium text-crimson">{{ error }}</p>
 
-          <div class="actions">
-            <RouterLink to="/scholarships">Cancel</RouterLink>
-            <button type="submit" :disabled="submitting">{{ submitting ? 'Submitting...' : 'Submit application' }}</button>
+          <div class="flex flex-col-reverse gap-3 border-t border-ink/8 pt-5 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
+            <RouterLink
+              to="/scholarships"
+              class="inline-flex w-full items-center justify-center rounded-xl px-5 py-3 text-[13px] font-semibold text-ink/50 hover:text-ink sm:w-auto"
+            >
+              Cancel
+            </RouterLink>
+            <button
+              type="submit"
+              :disabled="submitting"
+              class="inline-flex w-full items-center justify-center rounded-xl bg-crimson px-6 py-3.5 text-[13.5px] font-semibold text-white transition hover:brightness-110 disabled:cursor-default disabled:opacity-60 sm:w-auto"
+            >
+              {{ submitting ? 'Submitting...' : 'Submit application' }}
+            </button>
           </div>
         </form>
       </div>
@@ -186,119 +253,21 @@ async function onSubmit() {
 </template>
 
 <style scoped>
-.apply-page {
-  min-height: 70vh;
-  background:
-    radial-gradient(900px 280px at 10% -10%, rgba(124, 58, 237, 0.16), transparent 60%),
-    linear-gradient(180deg, #f3f0ff 0%, #f7f8fa 220px);
-  padding: 28px 16px 48px;
-}
-.apply-wrap { max-width: 860px; margin: 0 auto; }
-.back-link { color: #6d28d9; font-size: 13px; font-weight: 600; text-decoration: none; }
-.sheet {
-  margin-top: 14px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 24px 60px -36px rgba(76, 29, 149, 0.45);
-  overflow: hidden;
-}
-.skeleton { height: 520px; }
-.empty { padding: 48px; text-align: center; color: #6b7280; }
-.hero {
-  padding: 28px 28px 8px;
-  background: linear-gradient(180deg, #faf8ff 0%, #fff 100%);
-}
-.eyebrow {
-  margin: 0;
-  color: #7c3aed;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-h1 { margin: 8px 0 0; font-size: 32px; line-height: 1.1; color: #111827; }
-.program-name { margin: 8px 0 0; color: #6b7280; font-size: 14px; }
-.facts {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  padding: 8px 28px 22px;
-}
-.fact {
-  background: #f8f5ff;
-  border-radius: 12px;
-  padding: 10px 12px;
-}
-.fact span { display: block; color: #8b87a0; font-size: 11px; }
-.fact strong { display: block; margin-top: 2px; color: #1f1633; font-size: 13px; }
-form { padding: 8px 28px 28px; }
-section + section { margin-top: 22px; }
-h2 {
-  margin: 0 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f0e9ff;
-  color: #4c1d95;
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
-.grid.three { grid-template-columns: 1fr 1fr 1fr; }
-label, .note {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  color: #374151;
-  font-size: 12px;
-  font-weight: 600;
-}
-input, select, textarea {
+.field {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #e7e5ef;
-  border-radius: 12px;
+  border: 1px solid rgba(10, 22, 40, 0.12);
+  border-radius: 0.75rem;
   background: #fcfcfd;
-  color: #111827;
-  padding: 11px 12px;
+  color: #0a1628;
+  padding: 0.7rem 0.8rem;
   font-size: 14px;
   font-weight: 500;
   outline: none;
 }
-input:focus, select:focus, textarea:focus {
-  border-color: #7c3aed;
+.field:focus {
+  border-color: #d61f26;
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
-}
-.note { margin-top: 16px; }
-.error { color: #dc2626; font-size: 13px; }
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  margin-top: 22px;
-  padding-top: 16px;
-  border-top: 1px solid #f3f4f6;
-}
-.actions a { color: #6b7280; font-size: 13px; font-weight: 600; text-decoration: none; }
-button {
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #8b5cf6, #6d28d9);
-  color: #fff;
-  padding: 12px 22px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-button:disabled { opacity: 0.6; cursor: default; }
-.done { padding: 56px 28px; text-align: center; }
-.done h2 { border: 0; color: #111827; font-size: 24px; letter-spacing: 0; text-transform: none; }
-.done p { color: #6b7280; }
-.track { color: #6d28d9 !important; font-weight: 700; }
-@media (max-width: 720px) {
-  .facts, .grid, .grid.three { grid-template-columns: 1fr 1fr; }
-  h1 { font-size: 26px; }
-  .hero, form, .facts { padding-left: 16px; padding-right: 16px; }
+  box-shadow: 0 0 0 3px rgba(214, 31, 38, 0.12);
 }
 </style>

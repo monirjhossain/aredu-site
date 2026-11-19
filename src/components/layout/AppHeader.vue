@@ -34,6 +34,11 @@ function closeAll() {
   mobileOpen.value = false
 }
 
+function goHome() {
+  closeAll()
+  window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' })
+}
+
 function onKey(e) {
   if (e.key === 'Escape') closeAll()
 }
@@ -85,7 +90,7 @@ watch(mobileOpen, (open) => {
 <template>
   <header class="site-header sticky top-0 z-50" :class="{ 'is-scrolled': scrolled }" @mouseleave="mega = null">
     <div class="site-container flex items-center justify-between gap-4 py-3 lg:py-3.5">
-      <RouterLink to="/" class="group flex shrink-0 items-center" @click="closeAll">
+      <RouterLink to="/" class="group flex shrink-0 items-center" @click="goHome">
         <img
           src="/images/ar-logo.webp"
           :alt="BRAND"

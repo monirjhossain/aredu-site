@@ -14,6 +14,14 @@ const { whatsapp } = useSiteSettings()
 const route = useRoute()
 const showScrollTop = ref(false)
 
+// Start network refresh immediately (cache already hydrated sync).
+loadHomeBootstrap()
+  .then(() => prefetchCatalogs())
+  .catch(() => {
+    loadSiteSettings()
+    prefetchCatalogs()
+  })
+
 function onScroll() {
   showScrollTop.value = window.scrollY > 240
 }
@@ -30,14 +38,6 @@ watch(
 )
 
 onMounted(() => {
-  // One cached home call feeds the homepage; settings come with it.
-  // If home fails, fall back to settings-only.
-  loadHomeBootstrap()
-    .then(() => prefetchCatalogs())
-    .catch(() => {
-      loadSiteSettings()
-      prefetchCatalogs()
-    })
   window.addEventListener('scroll', onScroll, { passive: true })
   onScroll()
 })
@@ -51,12 +51,12 @@ onUnmounted(() => {
   <div>
     <a href="#main-content" class="skip-link">Skip to content</a>
     <AppHeader />
-    <main id="main-content" class="flex-1 bg-white" tabindex="-1">
+    <main id="main-content" class="flex-1 bg-white pb-20 sm:pb-8" tabindex="-1">
       <RouterView />
     </main>
     <AppFooter />
 
-    <div class="fixed bottom-5 right-5 z-[70] flex flex-col items-end gap-3">
+    <div class="fab-stack fixed bottom-4 right-4 z-[70] flex flex-col items-end gap-2.5 sm:bottom-5 sm:right-5 sm:gap-3">
       <a
         :href="whatsapp"
         target="_blank"
@@ -68,19 +68,19 @@ onUnmounted(() => {
           <span class="inline-flex h-2.5 w-2.5 rounded-full bg-[#16A34A]"></span>
           Talk to a free consultant
         </span>
-        <span class="flex h-14 w-14 items-center justify-center rounded-full bg-[#16A34A] shadow-[0_14px_32px_rgba(22,163,74,0.28)] transition group-hover:scale-105 group-hover:brightness-110">
-          <i class="ti ti-brand-whatsapp text-[28px]"></i>
+        <span class="flex h-12 w-12 items-center justify-center rounded-full bg-[#16A34A] shadow-[0_14px_32px_rgba(22,163,74,0.28)] transition group-hover:scale-105 group-hover:brightness-110 sm:h-14 sm:w-14">
+          <i class="ti ti-brand-whatsapp text-[24px] sm:text-[28px]"></i>
         </span>
       </a>
 
       <button
         v-show="showScrollTop"
         type="button"
-        class="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-white shadow-[0_12px_30px_rgba(10,22,40,0.25)] transition hover:bg-[#132038]"
+        class="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-white shadow-[0_12px_30px_rgba(10,22,40,0.25)] transition hover:bg-[#132038] sm:h-12 sm:w-12"
         aria-label="Scroll to top"
         @click="scrollToTop"
       >
-        <i class="ti ti-arrow-up text-[20px]"></i>
+        <i class="ti ti-arrow-up text-[18px] sm:text-[20px]"></i>
       </button>
     </div>
   </div>

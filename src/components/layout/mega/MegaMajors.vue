@@ -1,10 +1,11 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { DEGREES, FIELD_GROUPS } from '../../../data/site'
+import { useSiteCatalogs } from '../../../composables/useSiteCatalogs.js'
 import { fetchMajors } from '../../../api/majors.js'
 
 defineEmits(['close'])
+const { degrees, fieldGroups } = useSiteCatalogs()
 const majorCount = ref(0)
 
 onMounted(async () => {
@@ -39,7 +40,7 @@ onMounted(async () => {
         <div class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/35">Degree level</div>
         <div class="space-y-1">
           <RouterLink
-            v-for="d in DEGREES"
+            v-for="d in degrees"
             :key="d.slug"
             :to="`/study/${d.slug}`"
             class="group flex items-center gap-3 rounded-lg px-2 py-2.5 transition hover:bg-white"
@@ -55,7 +56,7 @@ onMounted(async () => {
         <div class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/35">Fields of study</div>
         <div class="columns-1 gap-x-8 sm:columns-2">
           <RouterLink
-            v-for="f in FIELD_GROUPS.slice(0, 10)"
+            v-for="f in fieldGroups.slice(0, 10)"
             :key="f"
             :to="{ path: '/majors', query: { field: f } }"
             class="mb-2 block break-inside-avoid text-[13px] font-medium text-ink/65 transition hover:text-crimson"

@@ -1,29 +1,19 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useSiteSettings } from '../../composables/useSiteSettings.js'
-
+import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 const { whatsapp: WHATSAPP, phone: PHONE } = useSiteSettings()
+const { sections } = useHomeBootstrap()
+
+const ask = computed(() => sections.value?.ask_experts || {})
+const quickQuestions = computed(() => ask.value.quick_questions || [])
+const experts = computed(() => ask.value.experts || [])
 
 const question = ref('')
 const name = ref('')
 const phone = ref('')
 const sent = ref(false)
-
-const quickQuestions = [
-  'Can I get a full CSC scholarship?',
-  'Do I need IELTS for China?',
-  'What is the total cost in Taka?',
-  'Which university is best for MBBS?',
-  'How long does admission take?',
-  'Is halal food available on campus?',
-]
-
-const experts = [
-  { initials: 'AR', name: 'Admission Desk', role: 'University matching', color: '#E11D2E' },
-  { initials: 'SC', name: 'Scholarship Coach', role: 'CSC & funding', color: '#0F766E' },
-  { initials: 'VS', name: 'Visa Support', role: 'X1 / X2 guidance', color: '#0A1628' },
-]
 
 function useQuick(q) {
   question.value = q
@@ -43,7 +33,7 @@ function submit() {
 </script>
 
 <template>
-  <section class="py-14 sm:py-16 lg:py-20">
+  <section v-if="ask.title" class="py-14 sm:py-16 lg:py-20">
     <div class="site-container">
       <div class="relative overflow-hidden rounded-[2rem] bg-white ring-1 ring-ink/8 lg:rounded-[2.5rem]">
         <div class="absolute inset-y-0 left-0 hidden w-[42%] bg-[#0B172A] lg:block"></div>
@@ -53,24 +43,20 @@ function submit() {
           <div class="bg-[#0B172A] px-6 py-8 text-white sm:px-8 lg:bg-transparent lg:px-10 lg:py-10">
             <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/65">
               <span class="h-2 w-2 rounded-full bg-jade"></span>
-              Live question desk
+              {{ ask.eyebrow }}
             </div>
 
             <h2 class="mt-5 max-w-sm font-display text-[1.8rem] font-extrabold leading-tight tracking-tight sm:text-3xl">
-              Ask our experts like a real conversation.
+              {{ ask.title }}
             </h2>
             <p class="mt-4 max-w-sm text-[14px] leading-relaxed text-white/58">
-              Scholarship, budget, documents or visa confusion? Start with one message and our team will guide your next step.
+              {{ ask.subtitle }}
             </p>
 
-            <div class="mt-8 space-y-3">
+            <div v-if="quickQuestions[0]" class="mt-8 space-y-3">
               <div class="max-w-[270px] rounded-[1.4rem] rounded-tl-md bg-white/8 px-4 py-3 ring-1 ring-white/10">
                 <div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/35">Student</div>
-                <div class="mt-1 text-[13px] leading-relaxed text-white/85">Can I study in China without IELTS?</div>
-              </div>
-              <div class="ml-auto max-w-[290px] rounded-[1.4rem] rounded-tr-md bg-white px-4 py-3 text-ink shadow-soft">
-                <div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-jade">AR Education</div>
-                <div class="mt-1 text-[13px] leading-relaxed text-ink/75">Yes, many universities accept MOI or internal interview. We help shortlist those options.</div>
+                <div class="mt-1 text-[13px] leading-relaxed text-white/85">{{ quickQuestions[0] }}</div>
               </div>
               <div class="max-w-[250px] rounded-[1.4rem] rounded-tl-md bg-crimson px-4 py-3 text-white shadow-soft">
                 <div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">Fast support</div>

@@ -1,6 +1,7 @@
 import { computed, inject, provide, reactive } from 'vue'
 import { fetchHomeBootstrap, getCachedHomeBootstrap } from '../api/home.js'
 import { applySiteSettings } from './useSiteSettings.js'
+import { mergeHomeSections } from '../data/homeSectionsDefaults.js'
 
 const HOME_KEY = 'homeBootstrap'
 
@@ -14,11 +15,20 @@ const state = reactive({
   majors: [],
   successPhotos: [],
   videos: [],
+  sections: mergeHomeSections({
+    tools: [],
+    degrees: [],
+    field_groups: [],
+    services_catalog: [],
+    hero: { slides: [] },
+    ask_experts: { experts: [], quick_questions: [] },
+  }),
   settings: null,
   error: null,
 })
 
 let loadPromise = null
+let hydrated = false
 
 function applyPayload(payload) {
   if (!payload) return
@@ -29,6 +39,7 @@ function applyPayload(payload) {
   state.majors = payload.majors || []
   state.successPhotos = payload.successPhotos || []
   state.videos = payload.videos || []
+  state.sections = mergeHomeSections(payload.sections || {})
   state.settings = payload.settings || null
   if (payload.settings) {
     applySiteSettings(payload.settings)
@@ -36,13 +47,24 @@ function applyPayload(payload) {
   state.loaded = true
 }
 
+/** Sync localStorage hydrate — call before first paint when possible. */
+export function hydrateHomeBootstrap() {
+  if (hydrated) return state.loaded
+  hydrated = true
+  const cached = getCachedHomeBootstrap({ allowStale: true })
+  if (cached) {
+    applyPayload(cached)
+    return true
+  }
+  return false
+}
+
+hydrateHomeBootstrap()
+
 export async function loadHomeBootstrap() {
   if (loadPromise) return loadPromise
 
-  const cached = getCachedHomeBootstrap()
-  if (cached) {
-    applyPayload(cached)
-  }
+  hydrateHomeBootstrap()
 
   state.loading = true
   loadPromise = fetchHomeBootstrap({ timeoutMs: 12000 })
@@ -65,6 +87,7 @@ export async function loadHomeBootstrap() {
 }
 
 export function provideHomeBootstrap() {
+  hydrateHomeBootstrap()
   provide(HOME_KEY, state)
   return state
 }
@@ -84,5 +107,6 @@ export function useHomeBootstrap() {
     majors: computed(() => home.majors || []),
     successPhotos: computed(() => home.successPhotos || []),
     videos: computed(() => home.videos || []),
+    sections: computed(() => home.sections || {}),
   }
 }

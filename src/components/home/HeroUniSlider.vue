@@ -1,16 +1,15 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { HOME_UNIVERSITIES } from '../../data/homeFallbacks.js'
 import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 
 const { universities } = useHomeBootstrap()
-const slides = ref([...HOME_UNIVERSITIES])
+const slides = ref([])
 const index = ref(0)
 const paused = ref(false)
 let timer = null
 
-const current = computed(() => slides.value[index.value] || slides.value[0])
+const current = computed(() => slides.value[index.value] || null)
 
 function go(i) {
   if (!slides.value.length) return
@@ -31,14 +30,12 @@ function stop() {
 }
 
 function applyUniversities(list) {
-  if (!list?.length) return
-  slides.value = list.slice(0, 8)
+  slides.value = list?.length ? list.slice(0, 8) : []
   index.value = 0
   start()
 }
 
 onMounted(() => {
-  start()
   applyUniversities(universities.value)
 })
 
@@ -49,7 +46,8 @@ onUnmounted(stop)
 
 <template>
   <div
-    class="relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-[2rem] sm:min-h-[480px] lg:max-w-[440px] lg:ml-auto"
+    v-if="current"
+    class="relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[1.5rem] sm:min-h-[420px] sm:rounded-[2rem] lg:ml-auto lg:max-w-[440px] lg:min-h-[480px]"
     @mouseenter="paused = true"
     @mouseleave="paused = false"
   >

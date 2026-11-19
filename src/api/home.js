@@ -3,17 +3,21 @@ import { mapPostToUniversity, resolveMediaUrl } from './universities.js'
 import { mapScholarship } from './scholarships.js'
 import { mapService } from './services.js'
 import { mapSubject } from './majors.js'
+import { mergeHomeSections } from '../data/homeSectionsDefaults.js'
 
-const STORAGE_KEY = 'ar_home_bootstrap_v1'
+const STORAGE_KEY = 'ar_home_bootstrap_v3'
 const STORAGE_TTL_MS = 5 * 60 * 1000
+const STALE_MAX_MS = 7 * 24 * 60 * 60 * 1000
 
-function readLocal() {
+function readLocal({ allowStale = true } = {}) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw)
     if (!parsed?.at || !parsed?.data) return null
-    if (Date.now() - parsed.at > STORAGE_TTL_MS) return null
+    const age = Date.now() - parsed.at
+    if (age > STALE_MAX_MS) return null
+    if (!allowStale && age > STORAGE_TTL_MS) return null
     return parsed.data
   } catch {
     return null
@@ -78,6 +82,7 @@ export function mapHomePayload(raw) {
 
   return {
     settings: data.settings || null,
+    sections: mergeHomeSections(data.sections || {}),
     universities,
     cities,
     scholarships,
@@ -89,8 +94,8 @@ export function mapHomePayload(raw) {
   }
 }
 
-export function getCachedHomeBootstrap() {
-  const cached = readLocal()
+export function getCachedHomeBootstrap({ allowStale = true } = {}) {
+  const cached = readLocal({ allowStale })
   return cached ? mapHomePayload(cached) : null
 }
 

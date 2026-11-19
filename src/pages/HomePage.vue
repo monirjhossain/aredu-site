@@ -1,13 +1,13 @@
 <script setup>
-import { defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { TOOLS, DEGREES, FIELD_GROUPS, SERVICES, SCHOLARSHIP_META } from '../data/site.js'
-import scholarshipsJson from '../data/scholarships.json'
-import { HOME_CITIES } from '../data/homeFallbacks.js'
+import { HOME_SECTIONS_DEFAULTS } from '../data/homeSectionsDefaults.js'
 import { useSiteSettings } from '../composables/useSiteSettings.js'
 import { useHomeBootstrap } from '../composables/useHomeBootstrap.js'
+import { useSiteCatalogs } from '../composables/useSiteCatalogs.js'
 import FaqItem from '../components/ui/FaqItem.vue'
 import StatCounter from '../components/ui/StatCounter.vue'
+import DeferredMount from '../components/ui/DeferredMount.vue'
 import HeroUniSlider from '../components/home/HeroUniSlider.vue'
 
 const PopularCoursesSection = defineAsyncComponent(() => import('../components/home/PopularCoursesSection.vue'))
@@ -15,60 +15,84 @@ const PopularUniversitiesSection = defineAsyncComponent(() => import('../compone
 const AskExpertsSection = defineAsyncComponent(() => import('../components/home/AskExpertsSection.vue'))
 const GallerySection = defineAsyncComponent(() => import('../components/home/GallerySection.vue'))
 const VideoShowcaseSection = defineAsyncComponent(() => import('../components/home/VideoShowcaseSection.vue'))
+const ToolsBannerSection = defineAsyncComponent(() => import('../components/home/ToolsBannerSection.vue'))
 
 const { brand, whatsapp, faqs } = useSiteSettings()
-const { cities: homeCities, scholarships: homeScholarships, services: homeServices } = useHomeBootstrap()
+const {
+  scholarships: homeScholarships,
+  services: homeServices,
+  sections: homeSections,
+} = useHomeBootstrap()
+const {
+  tools: TOOLS,
+  degrees: DEGREES,
+  fieldGroups: FIELD_GROUPS,
+  services: catalogServices,
+} = useSiteCatalogs()
 const router = useRouter()
 const searchQuery = ref('')
 
-/** Static China university campus slides from /public/images */
-const HERO_BG_SLIDES = [
-  '/images/hero-bg-1.jpg',
-  '/images/hero-bg-2.jpg',
-  '/images/hero-bg-3.jpg',
-  '/images/hero-bg-4.jpg',
-  '/images/hero-bg-5.jpg',
-  '/images/hero-bg-6.jpg',
-]
+const sections = computed(() => homeSections.value || {})
+const hero = computed(() => sections.value.hero || {})
+const stats = computed(() => sections.value.stats || {})
+const why = computed(() => sections.value.why || {})
+const how = computed(() => sections.value.how || {})
+const midCta = computed(() => sections.value.mid_cta || {})
+const finalCta = computed(() => sections.value.final_cta || {})
+const faqIntro = computed(() => sections.value.faq || {})
+
+const visibility = computed(() => ({
+  ...HOME_SECTIONS_DEFAULTS.visibility,
+  ...(sections.value.visibility || {}),
+}))
+
+function isVisible(key) {
+  return visibility.value?.[key] !== false
+}
+
+const heroSlides = computed(() => (Array.isArray(hero.value.slides) ? hero.value.slides : []))
+const heroHeadlineLines = computed(() => String(hero.value.headline || '').split(/\n+/).filter(Boolean))
+const whyChoose = computed(() => why.value.items || [])
+const howSteps = computed(() => how.value.items || [])
+const statsItems = computed(() => stats.value.items || [])
+
 const heroBgIndex = ref(0)
 let heroBgTimer = null
 
-// Instant content — never wait for API
-const featuredCities = ref([...HOME_CITIES])
-const scholarships = ref(
-  scholarshipsJson.slice(0, 6).map((s) => ({
-    ...s,
-    coverage: SCHOLARSHIP_META[s.slug]?.coverage || 'Award',
-    universities: SCHOLARSHIP_META[s.slug]?.universities || '—',
-    desc: SCHOLARSHIP_META[s.slug]?.desc || '',
-  })),
-)
-const services = ref([...SERVICES])
+const scholarships = ref([])
+const services = ref([])
 
 function applyHomeLists() {
-  if (homeCities.value?.length) {
-    featuredCities.value = homeCities.value
-      .map((c) => ({ ...c, uniCount: c.uniCount || c.universities || 1 }))
-      .sort((a, b) => b.uniCount - a.uniCount)
-      .slice(0, 5)
-  }
-  if (homeScholarships.value?.length) {
-    scholarships.value = homeScholarships.value
-  }
+  scholarships.value = homeScholarships.value?.length ? homeScholarships.value : []
   if (homeServices.value?.length) {
     services.value = homeServices.value
+  } else if (catalogServices.value?.length) {
+    services.value = catalogServices.value
+  } else {
+    services.value = []
   }
 }
 
-onMounted(() => {
+function restartHeroTimer() {
+  if (heroBgTimer) clearInterval(heroBgTimer)
+  if (!heroSlides.value.length) return
   heroBgTimer = setInterval(() => {
-    heroBgIndex.value = (heroBgIndex.value + 1) % HERO_BG_SLIDES.length
+    const total = heroSlides.value.length || 1
+    heroBgIndex.value = (heroBgIndex.value + 1) % total
   }, 5000)
+}
 
+onMounted(() => {
+  restartHeroTimer()
   applyHomeLists()
 })
 
-watch([homeCities, homeScholarships, homeServices], applyHomeLists)
+watch(heroSlides, () => {
+  heroBgIndex.value = 0
+  restartHeroTimer()
+})
+
+watch([homeScholarships, homeServices, catalogServices], applyHomeLists)
 
 onUnmounted(() => {
   if (heroBgTimer) clearInterval(heroBgTimer)
@@ -78,49 +102,19 @@ onUnmounted(() => {
 function onSearch() {
   router.push({ path: '/universities', query: { q: searchQuery.value } })
 }
-
-const whyChoose = [
-  {
-    title: 'Affordable in Taka',
-    desc: 'See the full cost in BDT before you apply — tuition, living, visa and flights.',
-    num: '01',
-  },
-  {
-    title: 'Scholarships that pay you',
-    desc: 'CSC and provincial awards can cover tuition, dorm, insurance and a monthly stipend.',
-    num: '02',
-  },
-  {
-    title: 'World-ranked degrees',
-    desc: '985 & 211 universities with strong engineering, medical and business programmes.',
-    num: '03',
-  },
-  {
-    title: 'Guided end-to-end',
-    desc: 'From shortlist to student visa — free counselling on WhatsApp, in Bangla.',
-    num: '04',
-  },
-]
-
-const howSteps = [
-  { step: '01', title: 'Discover', desc: 'Convert grades, estimate costs in Taka, and shortlist universities.' },
-  { step: '02', title: 'Shortlist', desc: 'Check scholarship eligibility and compare best-fit options.' },
-  { step: '03', title: 'Apply', desc: 'We prepare your file and submit to your chosen universities.' },
-  { step: '04', title: 'Fly', desc: 'Admission, JW202, student visa — then depart Dhaka ready.' },
-]
 </script>
 
 <template>
   <div>
-  <!-- HERO: static China campus slides + dark read overlay -->
-  <section class="relative min-h-[min(92vh,880px)] overflow-hidden text-white">
+  <!-- HERO -->
+  <section v-if="isVisible('hero')" class="relative min-h-[min(78vh,680px)] overflow-hidden text-white sm:min-h-[min(86vh,780px)] lg:min-h-[min(92vh,880px)]">
     <div class="pointer-events-none absolute inset-0" aria-hidden="true">
       <div
-        v-for="(src, i) in HERO_BG_SLIDES"
-        :key="src"
+        v-for="(src, i) in heroSlides"
+        :key="`${src}-${i}`"
         class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-[1400ms] ease-in-out"
         :class="i === heroBgIndex ? 'opacity-100 scale-105' : 'opacity-0 scale-100'"
-        :style="{ backgroundImage: `url('${src}')` }"
+        :style="Math.abs(i - heroBgIndex) <= 1 || i === 0 ? { backgroundImage: `url('${src}')` } : undefined"
       />
     </div>
     <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,rgba(8,16,32,0.86)_0%,rgba(10,22,40,0.72)_42%,rgba(10,22,40,0.45)_100%)]" />
@@ -129,10 +123,9 @@ const howSteps = [
     <div class="pointer-events-none absolute -right-24 top-1/4 h-[420px] w-[420px] rounded-full bg-crimson/15 blur-3xl" />
     <div class="pointer-events-none absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-jade/20 blur-3xl" />
 
-    <!-- Slide dots -->
     <div class="pointer-events-none absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-1.5 lg:bottom-8">
       <button
-        v-for="(_, i) in HERO_BG_SLIDES"
+        v-for="(_, i) in heroSlides"
         :key="i"
         type="button"
         class="pointer-events-auto h-1.5 rounded-full transition-all duration-300"
@@ -142,29 +135,31 @@ const howSteps = [
       />
     </div>
 
-    <div class="relative site-container grid min-h-[min(92vh,880px)] items-end gap-8 pb-12 pt-10 sm:gap-10 sm:pb-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-20 lg:pt-8">
+    <div class="relative site-container grid min-h-[min(68vh,560px)] items-end gap-6 pb-12 pt-6 sm:min-h-[min(86vh,780px)] sm:gap-10 sm:pb-14 sm:pt-10 lg:min-h-[min(92vh,880px)] lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-20 lg:pt-8">
       <div class="reveal">
-        <div class="font-display text-[clamp(1.9rem,4.5vw,2.75rem)] font-extrabold leading-tight tracking-tight">
+        <div class="font-display text-[clamp(1.65rem,4.2vw,2.75rem)] font-extrabold leading-tight tracking-tight">
           {{ brand }}
         </div>
-        <h1 class="mt-4 max-w-lg font-display text-[clamp(1.35rem,2.6vw,1.85rem)] font-bold leading-snug text-white/95">
-          Study in China,<br />guided from Bangladesh.
+        <h1 class="mt-3 max-w-lg font-display text-[clamp(1.25rem,2.5vw,1.85rem)] font-bold leading-snug text-white/95 sm:mt-4">
+          <template v-for="(line, i) in heroHeadlineLines" :key="i">
+            <br v-if="i" />{{ line }}
+          </template>
         </h1>
-        <p class="mt-3 max-w-md text-[14px] leading-relaxed text-white/60">
-          Universities, scholarships and real costs in Taka — with step-by-step help from admission to visa.
+        <p class="mt-2.5 max-w-md text-[13.5px] leading-relaxed text-white/60 sm:mt-3 sm:text-[14px]">
+          {{ hero.subheadline }}
         </p>
 
-        <div class="mt-6 flex flex-wrap gap-3">
-          <RouterLink to="/tools/find-university" class="btn-primary shadow-lg shadow-crimson/30">
-            Find my university
+        <div class="mt-5 flex flex-col gap-2.5 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-3">
+          <RouterLink :to="hero.primary_cta_url || '/tools/find-university'" class="btn-primary w-full shadow-lg shadow-crimson/30 sm:w-auto">
+            {{ hero.primary_cta_label }}
           </RouterLink>
-          <RouterLink to="/scholarships" class="btn-ghost border-white/20 bg-white/10 text-white hover:bg-white/15">
-            Browse scholarships
+          <RouterLink :to="hero.secondary_cta_url || '/scholarships'" class="btn-ghost w-full border-white/20 bg-white/10 text-white hover:bg-white/15 sm:w-auto">
+            {{ hero.secondary_cta_label }}
           </RouterLink>
         </div>
 
         <form
-          class="mt-6 flex max-w-md flex-col gap-2 rounded-2xl border border-white/15 bg-white/10 p-2 backdrop-blur-md sm:flex-row sm:items-center sm:p-1.5 sm:pl-4"
+          class="mt-5 hidden max-w-md flex-col gap-2 rounded-2xl border border-white/15 bg-white/10 p-2 backdrop-blur-md sm:mt-6 sm:flex sm:flex-row sm:items-center sm:p-1.5 sm:pl-4"
           @submit.prevent="onSearch"
         >
           <div class="flex items-center gap-2 px-2 sm:flex-1 sm:px-0">
@@ -172,7 +167,7 @@ const howSteps = [
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search universities, majors…"
+              :placeholder="hero.search_placeholder"
               class="w-full bg-transparent py-2 text-[14px] text-white placeholder:text-white/40 outline-none"
             />
           </div>
@@ -182,40 +177,35 @@ const howSteps = [
         </form>
       </div>
 
-      <!-- Dominant visual + university slider -->
-      <div class="relative reveal" style="animation-delay: 0.15s">
-        <HeroUniSlider />
+      <div class="relative hidden reveal sm:block" style="animation-delay: 0.15s">
+        <HeroUniSlider v-if="isVisible('popular_universities')" />
       </div>
     </div>
   </section>
 
-  <!-- Impact strip — soft bar under hero -->
-  <section class="relative z-30 -mt-16 -mb-16 sm:-mt-20 sm:-mb-20">
+  <!-- Impact strip -->
+  <section v-if="isVisible('stats')" class="relative z-30 -mt-10 -mb-10 sm:-mt-20 sm:-mb-20">
     <div class="site-container">
       <div class="overflow-hidden rounded-2xl bg-[#E8F3F1] px-5 py-7 shadow-soft ring-1 ring-jade/15 sm:px-8 sm:py-8 lg:rounded-3xl lg:px-10">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-0">
           <div class="shrink-0 lg:max-w-[220px] lg:border-r lg:border-jade/20 lg:pr-10">
-            <div class="text-[10px] font-bold uppercase tracking-[0.18em] text-crimson">AR Education</div>
+            <div class="text-[10px] font-bold uppercase tracking-[0.18em] text-crimson">{{ stats.eyebrow }}</div>
             <p class="mt-2 text-[14px] font-semibold leading-snug text-ink">
-              Numbers that matter for your China journey.
+              {{ stats.intro }}
             </p>
           </div>
 
           <div class="grid flex-1 grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5 lg:gap-0 lg:pl-2">
-            <div class="lg:border-r lg:border-jade/15 lg:px-6">
-              <StatCounter :target="98" label="Universities" />
-            </div>
-            <div class="lg:border-r lg:border-jade/15 lg:px-6">
-              <StatCounter :target="9" label="Scholarships" />
-            </div>
-            <div class="lg:border-r lg:border-jade/15 lg:px-6">
-              <StatCounter :target="52" label="Cities" />
-            </div>
-            <div class="lg:border-r lg:border-jade/15 lg:px-6">
-              <StatCounter :target="121" label="Majors" />
-            </div>
-            <div class="col-span-2 sm:col-span-1 lg:px-6">
-              <StatCounter :target="2000" label="Students" />
+            <div
+              v-for="(item, i) in statsItems"
+              :key="`${item.label}-${i}`"
+              class="lg:px-6"
+              :class="[
+                i < statsItems.length - 1 ? 'lg:border-r lg:border-jade/15' : '',
+                i === statsItems.length - 1 ? 'col-span-2 sm:col-span-1' : '',
+              ]"
+            >
+              <StatCounter :target="Number(item.value) || 0" :label="item.label" />
             </div>
           </div>
         </div>
@@ -223,12 +213,16 @@ const howSteps = [
     </div>
   </section>
 
-  <PopularCoursesSection />
+  <DeferredMount v-if="isVisible('popular_courses')" min-height="420px">
+    <PopularCoursesSection />
+  </DeferredMount>
 
-  <PopularUniversitiesSection />
+  <DeferredMount v-if="isVisible('popular_universities')" min-height="520px">
+    <PopularUniversitiesSection />
+  </DeferredMount>
 
   <!-- Tools — journey list -->
-  <section class="py-16 lg:py-24">
+  <section v-if="isVisible('tools') && TOOLS.length" class="py-16 lg:py-24">
     <div class="site-container">
       <div class="overflow-hidden rounded-[2rem] bg-[#F4F6F8] lg:rounded-[2.5rem]">
       <div class="grid lg:grid-cols-[0.95fr_1.05fr]">
@@ -300,10 +294,14 @@ const howSteps = [
     </div>
   </section>
 
-  <AskExpertsSection />
+  <ToolsBannerSection v-if="isVisible('tools_banner')" />
+
+  <DeferredMount v-if="isVisible('ask_experts')" min-height="640px">
+    <AskExpertsSection />
+  </DeferredMount>
 
   <!-- Services -->
-  <section class="relative overflow-hidden py-14 sm:py-16 lg:py-20">
+  <section v-if="isVisible('services') && services.length" class="relative overflow-hidden py-14 sm:py-16 lg:py-20">
     <div class="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[#F4F6F8] to-transparent" />
 
     <div class="relative site-container">
@@ -382,7 +380,7 @@ const howSteps = [
   </section>
 
   <!-- Degrees -->
-  <section class="relative overflow-hidden border-y border-ink/8 bg-[#FBFAF7] py-16 lg:py-20">
+  <section v-if="isVisible('degrees') && DEGREES.length" class="relative overflow-hidden border-y border-ink/8 bg-[#FBFAF7] py-16 lg:py-20">
     <div class="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-jade/5 to-transparent"></div>
     <div class="pointer-events-none absolute -left-12 top-12 h-40 w-40 rounded-full bg-crimson/8 blur-3xl"></div>
     <div class="pointer-events-none absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-jade/8 blur-3xl"></div>
@@ -403,7 +401,7 @@ const howSteps = [
 
       <div class="mt-12 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
         <RouterLink
-          :to="`/study/${DEGREES[0].slug}`"
+          :to="`/study/${DEGREES[0]?.slug || 'bachelor'}`"
           class="group relative overflow-hidden rounded-[2rem] bg-[#0B172A] p-6 text-white shadow-soft sm:p-8"
         >
           <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_35%)]"></div>
@@ -434,7 +432,7 @@ const howSteps = [
                 <div class="absolute inset-0 texture-grid opacity-30"></div>
                 <div class="absolute -right-8 top-3 h-24 w-24 rounded-full bg-white/12 blur-2xl"></div>
                 <div class="absolute left-5 top-5 rounded-full bg-white/12 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/75 backdrop-blur">
-                  Dummy visual
+                  {{ DEGREES[0]?.name || 'Degree' }} path
                 </div>
 
                 <div class="absolute inset-x-5 bottom-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -540,7 +538,7 @@ const howSteps = [
   </section>
 
   <!-- Fields -->
-  <section class="section-pad">
+  <section v-if="isVisible('fields') && FIELD_GROUPS.length" class="section-pad">
     <div class="overflow-hidden rounded-[2rem] bg-[#F7FAF9] ring-1 ring-jade/10 lg:rounded-[2.5rem]">
       <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <div class="relative overflow-hidden bg-ink px-6 py-10 text-white sm:px-8 lg:px-10 lg:py-12">
@@ -656,7 +654,7 @@ const howSteps = [
   </section>
 
   <!-- Scholarships -->
-  <section class="relative overflow-hidden py-16 lg:py-24">
+  <section v-if="isVisible('scholarships') && scholarships.length" class="relative overflow-hidden py-16 lg:py-24">
     <div class="absolute inset-0 bg-[linear-gradient(135deg,#071320_0%,#0b2340_30%,#0f766e_70%,#12324d_100%)]"></div>
     <div class="pointer-events-none absolute inset-0 texture-grid opacity-20"></div>
     <div class="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-20" style="background: radial-gradient(circle at 70% 35%, #fff, transparent 55%)" />
@@ -777,19 +775,19 @@ const howSteps = [
   </section>
 
   <!-- Match CTA -->
-  <section class="site-container pb-8">
+  <section v-if="isVisible('mid_cta')" class="site-container pb-8">
     <div class="overflow-hidden rounded-[2rem] bg-sand px-6 py-12 text-center sm:px-12">
-      <h2 class="headline text-3xl sm:text-4xl">Not sure where to start?</h2>
-      <p class="mx-auto mt-3 max-w-md text-[15px] text-ink/55">Answer a few questions — we'll match universities and scholarships free, in minutes.</p>
+      <h2 class="headline text-3xl sm:text-4xl">{{ midCta.title }}</h2>
+      <p class="mx-auto mt-3 max-w-md text-[15px] text-ink/55">{{ midCta.subtitle }}</p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-        <RouterLink to="/tools/find-university" class="btn-primary w-full sm:w-auto">Find my university →</RouterLink>
-        <a :href="whatsapp" target="_blank" rel="noopener" class="btn-ghost w-full sm:w-auto">WhatsApp us</a>
+        <RouterLink :to="midCta.primary_cta_url || '/tools/find-university'" class="btn-primary w-full sm:w-auto">{{ midCta.primary_cta_label }}</RouterLink>
+        <a :href="whatsapp" target="_blank" rel="noopener" class="btn-ghost w-full sm:w-auto">{{ midCta.secondary_cta_label }}</a>
       </div>
     </div>
   </section>
 
   <!-- Why -->
-  <section class="section-pad">
+  <section v-if="isVisible('why')" class="section-pad">
     <div class="overflow-hidden rounded-[2rem] bg-white ring-1 ring-ink/8 lg:rounded-[2.5rem]">
       <div class="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
         <div class="relative overflow-hidden bg-[#F7FAF9] px-6 py-10 sm:px-8 lg:px-10 lg:py-12">
@@ -799,20 +797,20 @@ const howSteps = [
           <div class="relative">
             <div class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 ring-1 ring-ink/8">
               <i class="ti ti-world text-[14px] text-crimson"></i>
-              <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-crimson">Why China</span>
+              <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-crimson">{{ why.eyebrow }}</span>
             </div>
             <h2 class="mt-4 max-w-md font-display text-[1.8rem] font-extrabold leading-tight tracking-tight text-ink sm:text-4xl">
-              Why Bangladeshi students choose China.
+              {{ why.title }}
             </h2>
             <p class="mt-4 max-w-md text-[14.5px] leading-relaxed text-ink/50">
-              Affordable education, scholarship access and a faster path to globally relevant degrees make China one of the strongest options for Bangladeshi students.
+              {{ why.subtitle }}
             </p>
 
             <div class="mt-8 rounded-[1.6rem] bg-ink p-5 text-white sm:p-6">
-              <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">Fast summary</div>
-              <div class="mt-2 font-display text-xl font-extrabold">Lower cost, better options, clearer support.</div>
+              <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{{ why.summary_label }}</div>
+              <div class="mt-2 font-display text-xl font-extrabold">{{ why.summary_title }}</div>
               <p class="mt-2 text-[13px] leading-relaxed text-white/55">
-                Students can compare tuition in Taka, aim for funded routes and get end-to-end help from Bangladesh.
+                {{ why.summary_text }}
               </p>
             </div>
           </div>
@@ -828,18 +826,7 @@ const howSteps = [
             <div class="flex items-start justify-between gap-4">
               <span class="font-display text-sm font-bold text-crimson">{{ item.num }}</span>
               <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F7F8FA] text-[16px] text-ink/55 transition group-hover:bg-crimson group-hover:text-white">
-                <i
-                  class="ti"
-                  :class="
-                    item.num === '01'
-                      ? 'ti-wallet'
-                      : item.num === '02'
-                        ? 'ti-rosette-discount-check'
-                        : item.num === '03'
-                          ? 'ti-building-bank'
-                          : 'ti-users-group'
-                  "
-                ></i>
+                <i class="ti" :class="item.icon || 'ti-star'"></i>
               </span>
             </div>
             <h3 class="mt-8 font-display text-[1.08rem] font-bold text-ink group-hover:text-crimson">{{ item.title }}</h3>
@@ -851,18 +838,18 @@ const howSteps = [
   </section>
 
   <!-- How -->
-  <section class="border-y border-ink/8 bg-white py-16 lg:py-24">
+  <section v-if="isVisible('how')" class="border-y border-ink/8 bg-white py-16 lg:py-24">
     <div class="site-container">
       <div class="mx-auto max-w-2xl text-center">
         <div class="inline-flex items-center gap-2 rounded-full bg-jade/10 px-3 py-1.5">
           <i class="ti ti-route-2 text-[14px] text-jade"></i>
-          <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-jade">How it works</span>
+          <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-jade">{{ how.eyebrow }}</span>
         </div>
         <h2 class="mt-4 font-display text-[1.8rem] font-extrabold leading-tight tracking-tight text-ink sm:text-4xl">
-          Your path from first search to class day.
+          {{ how.title }}
         </h2>
         <p class="mt-4 text-[14.5px] leading-relaxed text-ink/50">
-          A simple four-step process for Bangladeshi students planning admission, scholarship and visa support for China.
+          {{ how.subtitle }}
         </p>
       </div>
 
@@ -886,18 +873,7 @@ const howSteps = [
                   {{ step.step }}
                 </span>
                 <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[16px] text-ink/60 ring-1 ring-ink/6 transition group-hover:bg-ink group-hover:text-white">
-                  <i
-                    class="ti"
-                    :class="
-                      i === 0
-                        ? 'ti-search'
-                        : i === 1
-                          ? 'ti-list-check'
-                          : i === 2
-                            ? 'ti-file-check'
-                            : 'ti-plane-departure'
-                    "
-                  ></i>
+                  <i class="ti" :class="step.icon || 'ti-circle-check'"></i>
                 </span>
               </div>
 
@@ -917,12 +893,16 @@ const howSteps = [
     </div>
   </section>
 
-  <GallerySection />
+  <DeferredMount v-if="isVisible('gallery')" min-height="360px">
+    <GallerySection />
+  </DeferredMount>
 
-  <VideoShowcaseSection />
+  <DeferredMount v-if="isVisible('videos')" min-height="480px">
+    <VideoShowcaseSection />
+  </DeferredMount>
 
   <!-- FAQ -->
-  <section class="section-pad">
+  <section v-if="isVisible('faq')" class="section-pad">
     <div class="overflow-hidden rounded-[2rem] bg-[#FBFAF7] ring-1 ring-ink/8 lg:rounded-[2.5rem]">
       <div class="grid gap-0 lg:grid-cols-[0.82fr_1.18fr]">
         <div class="relative overflow-hidden bg-ink px-6 py-10 text-white sm:px-8 lg:px-10 lg:py-12">
@@ -933,19 +913,19 @@ const howSteps = [
           <div class="relative">
             <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5">
               <i class="ti ti-help-circle text-[14px] text-jade"></i>
-              <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">FAQ</span>
+              <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">{{ faqIntro.eyebrow }}</span>
             </div>
             <h2 class="mt-4 max-w-md font-display text-[1.8rem] font-extrabold leading-tight tracking-tight sm:text-4xl">
-              Frequently asked questions
+              {{ faqIntro.title }}
             </h2>
             <p class="mt-4 max-w-md text-[14.5px] leading-relaxed text-white/58">
-              Quick answers to the questions Bangladeshi students ask most about universities, scholarships, costs and admission in China.
+              {{ faqIntro.subtitle }}
             </p>
 
             <div class="mt-8 rounded-[1.6rem] bg-white/8 p-5 ring-1 ring-white/10">
-              <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">Need a direct answer?</div>
+              <div class="text-[11px] font-bold uppercase tracking-[0.14em] text-white/40">{{ faqIntro.help_label }}</div>
               <p class="mt-2 text-[13px] leading-relaxed text-white/55">
-                If your question is not listed here, our team can guide you directly in Bangla.
+                {{ faqIntro.help_text }}
               </p>
               <a
                 :href="whatsapp"
@@ -953,7 +933,7 @@ const howSteps = [
                 rel="noopener"
                 class="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-[13px] font-semibold text-ink transition hover:bg-sand"
               >
-                Ask on WhatsApp
+                {{ faqIntro.help_cta_label }}
                 <i class="ti ti-arrow-right"></i>
               </a>
             </div>
@@ -970,14 +950,14 @@ const howSteps = [
   </section>
 
   <!-- Final CTA -->
-  <section class="pb-20">
+  <section v-if="isVisible('final_cta')" class="pb-20">
     <div class="site-container">
       <div class="overflow-hidden rounded-[2rem] mesh-hero px-6 py-14 text-center text-white sm:px-12">
-        <div class="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Ready to study in China?</div>
-        <p class="mx-auto mt-3 max-w-lg text-[15px] text-white/60">Free counselling in Bangla — pick a university, apply, win a scholarship, reach class day one.</p>
+        <div class="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{{ finalCta.title }}</div>
+        <p class="mx-auto mt-3 max-w-lg text-[15px] text-white/60">{{ finalCta.subtitle }}</p>
         <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-          <a :href="whatsapp" target="_blank" rel="noopener" class="btn-primary w-full sm:w-auto">Chat on WhatsApp</a>
-          <RouterLink to="/tools/find-university" class="btn-ghost w-full border-white/20 bg-white/10 text-white hover:bg-white/15 sm:w-auto">Find my university</RouterLink>
+          <a :href="whatsapp" target="_blank" rel="noopener" class="btn-primary w-full sm:w-auto">{{ finalCta.primary_cta_label }}</a>
+          <RouterLink :to="finalCta.secondary_cta_url || '/tools/find-university'" class="btn-ghost w-full border-white/20 bg-white/10 text-white hover:bg-white/15 sm:w-auto">{{ finalCta.secondary_cta_label }}</RouterLink>
         </div>
       </div>
     </div>

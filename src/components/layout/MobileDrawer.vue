@@ -6,7 +6,12 @@ import { useSiteSettings } from '../../composables/useSiteSettings.js'
 const { brand: BRAND, whatsapp: WHATSAPP } = useSiteSettings()
 
 const props = defineProps({ open: Boolean })
-defineEmits(['close'])
+const emit = defineEmits(['close'])
+
+function goHome() {
+  emit('close')
+  window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' })
+}
 
 const primary = [
   ['/universities', 'Universities', 'ti-building-bank'],
@@ -14,12 +19,20 @@ const primary = [
   ['/majors', 'Majors', 'ti-book-2'],
   ['/cities', 'Cities', 'ti-map-pin'],
   ['/services', 'Services', 'ti-briefcase'],
-  ['/tools/find-university', 'Tools', 'ti-tools'],
+  ['/about', 'About us', 'ti-building-community'],
+]
+
+const tools = [
+  ['/tools/find-university', 'Find university', 'ti-search'],
+  ['/tools/scholarship-checker', 'Scholarship checker', 'ti-rosette-discount-check'],
+  ['/tools/gpa-converter', 'GPA converter', 'ti-calculator'],
+  ['/tools/cost-calculator', 'Cost calculator', 'ti-currency-taka'],
 ]
 
 const secondary = [
-  ['/about', 'About us'],
   ['/contact', 'Contact'],
+  ['/compare', 'Compare'],
+  ['/map', 'University map'],
   ['/login', 'Login'],
 ]
 
@@ -61,7 +74,7 @@ onUnmounted(() => {
         class="fixed inset-y-0 left-0 z-[70] flex w-[min(100%,360px)] flex-col bg-[#F4F6F8] lg:hidden"
       >
         <div class="flex items-center justify-between border-b border-ink/8 bg-white px-4 py-3.5">
-          <RouterLink to="/" class="flex items-center" @click="$emit('close')">
+          <RouterLink to="/" class="flex items-center" @click="goHome">
             <img src="/images/ar-logo.webp" :alt="BRAND" class="h-9 w-auto max-w-[140px] object-contain" />
           </RouterLink>
           <button
@@ -90,6 +103,24 @@ onUnmounted(() => {
               </span>
               {{ l[1] }}
               <i class="ti ti-chevron-right ml-auto text-[16px] text-ink/25"></i>
+            </RouterLink>
+          </div>
+
+          <div class="mb-2 mt-5 px-2 text-[10px] font-bold uppercase tracking-[0.16em] text-ink/35">Free tools</div>
+          <div class="overflow-hidden rounded-2xl bg-white ring-1 ring-ink/8">
+            <RouterLink
+              v-for="(l, i) in tools"
+              :key="l[0]"
+              :to="l[0]"
+              class="flex items-center gap-3 px-4 py-3 text-[13.5px] font-semibold text-ink active:bg-[#F7F8FA]"
+              :class="i !== tools.length - 1 ? 'border-b border-ink/6' : ''"
+              @click="$emit('close')"
+            >
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-crimson/10 text-crimson">
+                <i class="ti text-[15px]" :class="l[2]"></i>
+              </span>
+              {{ l[1] }}
+              <i class="ti ti-chevron-right ml-auto text-[15px] text-ink/25"></i>
             </RouterLink>
           </div>
 

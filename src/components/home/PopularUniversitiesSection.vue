@@ -1,17 +1,16 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { HOME_UNIVERSITIES } from '../../data/homeFallbacks.js'
 import { useHomeBootstrap } from '../../composables/useHomeBootstrap.js'
 import UniversityCard from '../ui/UniversityCard.vue'
 
 const { universities } = useHomeBootstrap()
-const featured = ref([...HOME_UNIVERSITIES])
+const featured = ref([])
 const currentIndex = ref(0)
 const paused = ref(false)
 let timer = null
 
-const heroUniversity = computed(() => featured.value[currentIndex.value] || featured.value[0])
+const heroUniversity = computed(() => featured.value[currentIndex.value] || null)
 const sideUniversities = computed(() => {
   if (!featured.value.length) return []
   return Array.from({ length: Math.min(4, featured.value.length) }, (_, i) =>
@@ -44,8 +43,7 @@ function stopSlider() {
 }
 
 function applyUniversities(list) {
-  if (!list?.length) return
-  featured.value = list.slice(0, 10)
+  featured.value = list?.length ? list.slice(0, 10) : []
   currentIndex.value = 0
   startSlider()
 }
@@ -53,7 +51,6 @@ function applyUniversities(list) {
 const sectionEl = ref(null)
 
 onMounted(() => {
-  startSlider()
   applyUniversities(universities.value)
 })
 
@@ -65,7 +62,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section ref="sectionEl" class="relative overflow-hidden bg-[#F7FAF9] py-14 sm:py-16 lg:py-20">
+  <section v-if="featured.length" ref="sectionEl" class="relative overflow-hidden bg-[#F7FAF9] py-14 sm:py-16 lg:py-20">
     <div class="pointer-events-none absolute -right-20 top-10 h-56 w-56 rounded-full bg-jade/10 blur-3xl" />
     <div class="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-crimson/5 blur-3xl" />
 

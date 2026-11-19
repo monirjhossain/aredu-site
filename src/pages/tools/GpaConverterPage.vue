@@ -42,37 +42,76 @@ const hasInput = computed(() => ssc.value || hsc.value || bachelor.value || mast
 </script>
 
 <template>
-  <div class="site-container max-w-2xl py-10">
-    <div class="mb-8 text-center">
-      <span class="text-[11px] font-semibold uppercase tracking-widest" style="color: var(--color-primary)">Free tool</span>
-      <h1 class="mt-2 text-2xl font-extrabold text-[var(--color-secondary)]">GPA converter</h1>
-      <p class="mt-2 text-[14px] text-gray-500">Convert SSC/HSC (out of 5) or CGPA (out of 4) to China's 100-point score.</p>
+  <div class="site-container max-w-2xl py-8 sm:py-10 lg:py-12">
+    <div class="mb-6 text-center sm:mb-8">
+      <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-crimson">Free tool</span>
+      <h1 class="mt-2 font-display text-[1.55rem] font-extrabold tracking-tight text-ink sm:text-2xl md:text-3xl">
+        GPA converter
+      </h1>
+      <p class="mx-auto mt-2 max-w-md text-[13.5px] leading-relaxed text-ink/50 sm:text-[14px]">
+        Convert SSC/HSC (out of 5) or CGPA (out of 4) to China's 100-point score.
+      </p>
     </div>
 
-    <div class="rounded-2xl border border-gray-200 bg-white p-6">
-      <div class="grid gap-4 sm:grid-cols-2">
+    <div class="rounded-[1.35rem] bg-white p-4 ring-1 ring-ink/8 sm:rounded-2xl sm:p-6">
+      <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
         <div>
-          <label class="block text-[12px] font-semibold text-gray-500">SSC GPA (out of 5)</label>
-          <input v-model="ssc" type="number" step="0.01" min="0" max="5" placeholder="e.g. 4.50" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-[14px] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]" />
+          <label class="block text-[12px] font-semibold text-ink/50">SSC GPA (out of 5)</label>
+          <input
+            v-model="ssc"
+            type="number"
+            step="0.01"
+            min="0"
+            max="5"
+            inputmode="decimal"
+            placeholder="e.g. 4.50"
+            class="mt-1.5 w-full rounded-xl border border-ink/12 bg-[#FCFCFD] px-3 py-2.5 text-[14px] text-ink outline-none focus:border-crimson focus:ring-2 focus:ring-crimson/15"
+          />
         </div>
         <div>
-          <label class="block text-[12px] font-semibold text-gray-500">HSC GPA (out of 5)</label>
-          <input v-model="hsc" type="number" step="0.01" min="0" max="5" placeholder="e.g. 4.20" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-[14px] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]" />
+          <label class="block text-[12px] font-semibold text-ink/50">HSC GPA (out of 5)</label>
+          <input
+            v-model="hsc"
+            type="number"
+            step="0.01"
+            min="0"
+            max="5"
+            inputmode="decimal"
+            placeholder="e.g. 4.20"
+            class="mt-1.5 w-full rounded-xl border border-ink/12 bg-[#FCFCFD] px-3 py-2.5 text-[14px] text-ink outline-none focus:border-crimson focus:ring-2 focus:ring-crimson/15"
+          />
         </div>
         <div>
-          <label class="block text-[12px] font-semibold text-gray-500">Bachelor CGPA (out of 4)</label>
-          <input v-model="bachelor" type="number" step="0.01" min="0" max="4" placeholder="e.g. 3.50" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-[14px] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]" />
+          <label class="block text-[12px] font-semibold text-ink/50">Bachelor CGPA (out of 4)</label>
+          <input
+            v-model="bachelor"
+            type="number"
+            step="0.01"
+            min="0"
+            max="4"
+            inputmode="decimal"
+            placeholder="e.g. 3.50"
+            class="mt-1.5 w-full rounded-xl border border-ink/12 bg-[#FCFCFD] px-3 py-2.5 text-[14px] text-ink outline-none focus:border-crimson focus:ring-2 focus:ring-crimson/15"
+          />
         </div>
         <div>
-          <label class="block text-[12px] font-semibold text-gray-500">Master CGPA (out of 4)</label>
-          <input v-model="master" type="number" step="0.01" min="0" max="4" placeholder="e.g. 3.75" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-[14px] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]" />
+          <label class="block text-[12px] font-semibold text-ink/50">Master CGPA (out of 4)</label>
+          <input
+            v-model="master"
+            type="number"
+            step="0.01"
+            min="0"
+            max="4"
+            inputmode="decimal"
+            placeholder="e.g. 3.75"
+            class="mt-1.5 w-full rounded-xl border border-ink/12 bg-[#FCFCFD] px-3 py-2.5 text-[14px] text-ink outline-none focus:border-crimson focus:ring-2 focus:ring-crimson/15"
+          />
         </div>
       </div>
 
       <button
         type="button"
-        class="mt-6 w-full rounded-xl py-3 text-[14px] font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
-        style="background: var(--color-primary)"
+        class="btn-primary mt-5 w-full sm:mt-6"
         :disabled="!hasInput"
         @click="convert"
       >
@@ -80,31 +119,31 @@ const hasInput = computed(() => ssc.value || hsc.value || bachelor.value || mast
       </button>
     </div>
 
-    <div v-if="results" class="mt-6 space-y-3">
+    <div v-if="results" class="mt-5 space-y-3 sm:mt-6">
       <div
         v-for="r in results"
         :key="r.label"
-        class="rounded-2xl border border-gray-200 bg-white p-5"
+        class="overflow-hidden rounded-[1.35rem] bg-ink px-5 py-5 text-white sm:rounded-2xl sm:px-6 sm:py-6"
       >
-        <div class="text-[12px] font-semibold text-gray-400">{{ r.label }}</div>
-        <div class="mt-2 flex items-baseline gap-4">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-jade">{{ r.label }}</div>
+        <div class="mt-2 flex flex-wrap items-baseline gap-3 sm:gap-4">
           <div>
-            <span class="text-3xl font-extrabold text-[var(--color-secondary)]">{{ r.score.toFixed(1) }}</span>
-            <span class="text-[14px] text-gray-400"> / 100</span>
+            <span class="font-display text-[2rem] font-extrabold tracking-tight sm:text-4xl">{{ r.score.toFixed(1) }}</span>
+            <span class="text-[14px] text-white/45"> / 100</span>
           </div>
-          <span class="rounded-full px-3 py-1 text-[13px] font-bold text-white" style="background: var(--color-secondary)">
+          <span class="rounded-full bg-white/10 px-3 py-1 text-[13px] font-bold text-white">
             Grade {{ r.grade }}
           </span>
         </div>
-        <p class="mt-2 text-[12px] text-gray-500">Input: {{ r.input }} → China 100-point score</p>
+        <p class="mt-2 text-[12px] text-white/40">Input: {{ r.input }} → China 100-point score</p>
       </div>
     </div>
 
-    <p class="mt-6 text-center text-[12px] text-gray-400">
+    <p class="mt-6 text-center text-[12px] text-ink/40">
       Formulas: SSC/HSC × 20 (for /5 scale) · CGPA × 25 (for /4 scale)
     </p>
     <div class="mt-4 text-center">
-      <RouterLink to="/tools/scholarship-checker" class="text-[13px] font-semibold" style="color: var(--color-primary)">
+      <RouterLink to="/tools/scholarship-checker" class="text-[13px] font-semibold text-crimson hover:underline">
         Check scholarship eligibility →
       </RouterLink>
     </div>
